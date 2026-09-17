@@ -237,7 +237,7 @@
             </objects>
             <point key="canvasLocation" x="664.8854961832061" y="884.50704225352115"/>
         </scene>
-        <!--Favourate-->
+        <!--Profile-->
         <scene sceneID="pIe-7v-B7E">
             <objects>
                 <viewController id="QyE-fv-czM" sceneMemberID="viewController">
@@ -247,7 +247,7 @@
                         <viewLayoutGuide key="safeArea" id="FNl-Os-50f"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
-                    <tabBarItem key="tabBarItem" title="Favourate" image="person.circle" catalog="system" selectedImage="person.crop.circle.fill" id="zqu-V9-ESp"/>
+                    <tabBarItem key="tabBarItem" title="Profile" image="person.circle" catalog="system" selectedImage="person.crop.circle.fill" id="zqu-V9-ESp"/>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9Oq-sX-GtZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
@@ -437,6 +437,9 @@
                                                 <buttonConfiguration key="configuration" style="plain" image="heart" catalog="system" title="">
                                                     <color key="baseForegroundColor" red="1" green="0.268852755" blue="0.54549012399999997" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                 </buttonConfiguration>
+                                                <connections>
+                                                    <action selector="likeButtonTapped:" destination="Uiy-S0-vYa" eventType="touchUpInside" id="OHr-ur-CDN"/>
+                                                </connections>
                                             </button>
                                         </subviews>
                                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -536,6 +539,7 @@
                         <outlet property="descriptionLabel" destination="Eqc-Ep-9Ht" id="xZx-45-eUk"/>
                         <outlet property="dimensionsLabel" destination="W1s-r8-Akj" id="5zr-pK-xCI"/>
                         <outlet property="discountLabel" destination="hYz-Uz-COK" id="UJQ-Z0-eej"/>
+                        <outlet property="likeButton" destination="Ljm-Ha-CH3" id="V24-a2-wXS"/>
                         <outlet property="minOrderQuantityLabel" destination="3Xb-19-PMQ" id="L71-K3-OXY"/>
                         <outlet property="priceLabel" destination="ANn-Jr-Brx" id="08v-k1-uZl"/>
                         <outlet property="productImageView" destination="hz9-3o-L5v" id="dwR-h6-Cor"/>

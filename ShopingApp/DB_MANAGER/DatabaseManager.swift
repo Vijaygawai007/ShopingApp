@@ -19,10 +19,7 @@ class DatabaseManager {
     }
     
     // MARK: - Open Database
-    private func openDatabase() -> OpaquePointer? {
-        let fileURL = try! FileManager.default
-            .url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false)
-            .appendingPathComponent("CartDatabase.sqlite")
+    private func openDatabase() -> OpaquePointer? {let fileURL = try! FileManager.default.url(for: .documentDirectory, in: .userDomainMask, appropriateFor: nil, create: false).appendingPathComponent("CartDatabase.sqlite")
         
         var db: OpaquePointer?
         if sqlite3_open(fileURL.path, &db) != SQLITE_OK {
@@ -48,13 +45,7 @@ class DatabaseManager {
         
         var statement: OpaquePointer?
         
-        if sqlite3_prepare_v2(
-            db,
-            query,
-            -1,
-            &statement,
-            nil
-        ) == SQLITE_OK {
+        if sqlite3_prepare_v2(db,query,-1,&statement,nil) == SQLITE_OK {
             
             if sqlite3_step(statement) == SQLITE_DONE {
                 print("✅ CartProducts table ready")
@@ -75,13 +66,7 @@ class DatabaseManager {
         
         var alterStatement: OpaquePointer?
         
-        if sqlite3_prepare_v2(
-            db,
-            alterTableString,
-            -1,
-            &alterStatement,
-            nil
-        ) == SQLITE_OK {
+        if sqlite3_prepare_v2(db,alterTableString,-1,&alterStatement,nil) == SQLITE_OK {
             
             if sqlite3_step(alterStatement) == SQLITE_DONE {
                 print("✅ Thumbnail column added.")
@@ -108,51 +93,20 @@ class DatabaseManager {
         
         var statement: OpaquePointer?
         
-        if sqlite3_prepare_v2(
-            db,
-            query,
-            -1,
-            &statement,
-            nil
-        ) == SQLITE_OK {
+        if sqlite3_prepare_v2(db,query,-1,&statement,nil) == SQLITE_OK {
             
-            sqlite3_bind_int(
-                statement,
-                1,
-                Int32(product.id)
-            )
+            sqlite3_bind_int(statement,1,Int32(product.id))
             
-            sqlite3_bind_text(
-                statement,
-                2,
-                (product.title as NSString).utf8String,
-                -1,
-                nil
-            )
+            sqlite3_bind_text(statement,2,(product.title as NSString).utf8String,-1,nil)
             
-            sqlite3_bind_double(
-                statement,
-                3,
-                product.price
-            )
+            sqlite3_bind_double(statement,3,product.price)
             
-            sqlite3_bind_int(
-                statement,
-                4,
-                Int32(product.quantity)
-            )
+            sqlite3_bind_int(statement,4,Int32(product.quantity))
             
             // ⭐ Thumbnail
-            if let thumbnail = product.thumbnail,
-               !thumbnail.isEmpty {
+            if let thumbnail = product.thumbnail,!thumbnail.isEmpty {
                 
-                sqlite3_bind_text(
-                    statement,
-                    5,
-                    (thumbnail as NSString).utf8String,
-                    -1,
-                    nil
-                )
+                sqlite3_bind_text(statement,5,(thumbnail as NSString).utf8String,-1,nil)
                 
                 print("🖼️ Saving thumbnail:", thumbnail)
                 
@@ -185,13 +139,7 @@ class DatabaseManager {
         var statement: OpaquePointer?
         var products: [CartProduct] = []
         
-        if sqlite3_prepare_v2(
-            db,
-            query,
-            -1,
-            &statement,
-            nil
-        ) == SQLITE_OK {
+        if sqlite3_prepare_v2(db,query,-1,&statement,nil) == SQLITE_OK {
             
             while sqlite3_step(statement) == SQLITE_ROW {
                 

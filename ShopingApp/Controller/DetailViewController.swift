@@ -11,6 +11,7 @@ import Kingfisher
 class DetailViewController: UIViewController {
     
     // MARK: - IBOutlets
+    
     @IBOutlet weak var scrollView: UIScrollView!
     @IBOutlet weak var productImageView: UIImageView!
     
@@ -32,76 +33,237 @@ class DetailViewController: UIViewController {
     @IBOutlet weak var minOrderQuantityLabel: UILabel!
     @IBOutlet weak var tagsLabel: UILabel!
     
-    // MARK: - Received Data
+    // MARK: - LIKE BUTTON
+    
+    @IBOutlet weak var likeButton: UIButton!
+    
+    // MARK: - Product
+    
     var product: Product?
     var sectionTitle: String?
     
     // MARK: - Lifecycle
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
         setupUI()
         configureView()
+        
+        // Set heart after product is received
+        updateLikeButton()
     }
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        
+        updateLikeButton()
+    }
+    
+    // MARK: - Setup UI
     
     private func setupUI() {
-        // Allow multi-line wrapping for long descriptions and policy texts
-        titleLabel?.numberOfLines = 0
-        descriptionLabel?.numberOfLines = 0
-        warrantyLabel?.numberOfLines = 0
-        shippingLabel?.numberOfLines = 0
-        returnPolicyLabel?.numberOfLines = 0
-        tagsLabel?.numberOfLines = 0
         
-        // Prevent image distortion
-        productImageView?.contentMode = .scaleAspectFit
-        productImageView?.clipsToBounds = true
+        titleLabel.numberOfLines = 0
+        descriptionLabel.numberOfLines = 0
+        warrantyLabel.numberOfLines = 0
+        shippingLabel.numberOfLines = 0
+        returnPolicyLabel.numberOfLines = 0
+        tagsLabel.numberOfLines = 0
+        
+        productImageView.contentMode = .scaleAspectFit
+        productImageView.clipsToBounds = true
+        
+        // Button settings
+        likeButton.setTitle("", for: .normal)
+        likeButton.tintColor = .systemPink
     }
     
+    // MARK: - Configure Product
+    
     private func configureView() {
+        
+        guard let product = product else {
+            print("❌ Product is nil")
+            return
+        }
+        
         if let sectionTitle = sectionTitle {
             self.title = sectionTitle.capitalized
         }
         
-        guard let product = product else { return }
+        // MARK: Core Information
         
-        // MARK: 1. Core Information
-        brandLabel?.text = product.brand ?? "Generic"
-        titleLabel?.text = product.title
-        priceLabel?.text = String(format: "$%.2f", product.price)
-        discountLabel?.text = "\(product.discountPercentage)% OFF"
-        ratingLabel?.text = "★ \(product.rating) / 5.0"
-        descriptionLabel?.text = product.description
+        brandLabel.text = product.brand ?? "Generic"
         
-        // Stock & Availability status color coding
-        stockStatusLabel?.text = "\(product.availabilityStatus) (\(product.stock) left)"
-        stockStatusLabel?.textColor = product.stock > 5 ? .systemGreen : .systemRed
+        titleLabel.text = product.title
         
-        // MARK: 2. Policies & Delivery
-        warrantyLabel?.text = "Warranty: \(product.warrantyInformation)"
-        shippingLabel?.text = "Shipping: \(product.shippingInformation)"
-        returnPolicyLabel?.text = "Return Policy: \(product.returnPolicy)"
+        priceLabel.text = String(
+            format: "$%.2f",
+            product.price
+        )
         
-        // MARK: 3. Specifications
-        skuLabel?.text = "SKU: \(product.sku)"
-        weightLabel?.text = "Weight: \(product.weight)g"
-        minOrderQuantityLabel?.text = "Min Order: \(product.minimumOrderQuantity) unit(s)"
+        discountLabel.text =
+            "\(product.discountPercentage)% OFF"
+        
+        ratingLabel.text =
+            "★ \(product.rating) / 5.0"
+        
+        descriptionLabel.text =
+            product.description
+        
+        // MARK: Stock
+        
+        stockStatusLabel.text =
+            "\(product.availabilityStatus) (\(product.stock) left)"
+        
+        stockStatusLabel.textColor =
+            product.stock > 5
+            ? .systemGreen
+            : .systemRed
+        
+        // MARK: Policies
+        
+        warrantyLabel.text =
+            "Warranty: \(product.warrantyInformation)"
+        
+        shippingLabel.text =
+            "Shipping: \(product.shippingInformation)"
+        
+        returnPolicyLabel.text =
+            "Return Policy: \(product.returnPolicy)"
+        
+        // MARK: Specifications
+        
+        skuLabel.text =
+            "SKU: \(product.sku)"
+        
+        weightLabel.text =
+            "Weight: \(product.weight)g"
+        
+        minOrderQuantityLabel.text =
+            "Min Order: \(product.minimumOrderQuantity) unit(s)"
         
         let d = product.dimensions
-        dimensionsLabel?.text = String(format: "Dimensions: %.1f x %.1f x %.1f cm", d.width, d.height, d.depth)
+        
+        dimensionsLabel.text = String(
+            format: "Dimensions: %.1f x %.1f x %.1f cm",
+            d.width,
+            d.height,
+            d.depth
+        )
+        
+        // MARK: Tags
         
         if !product.tags.isEmpty {
-            tagsLabel?.text = "Tags: " + product.tags.map { "#\($0)" }.joined(separator: " ")
+            
+            tagsLabel.text =
+                "Tags: " +
+                product.tags
+                    .map { "#\($0)" }
+                    .joined(separator: " ")
+            
         } else {
-            tagsLabel?.text = nil
+            
+            tagsLabel.text = ""
         }
         
-        // MARK: 4. Image Loading
-        if let imageURL = URL(string: product.thumbnail) {
-            productImageView?.kf.indicatorType = .activity
-            productImageView?.kf.setImage(
+        // MARK: Product Image
+        
+        if !product.thumbnail.isEmpty,
+           let imageURL = URL(string: product.thumbnail) {
+            
+            productImageView.kf.indicatorType = .activity
+            
+            productImageView.kf.setImage(
                 with: imageURL,
                 placeholder: UIImage(systemName: "photo")
             )
+            
+        } else {
+            
+            productImageView.image =
+                UIImage(systemName: "photo")
         }
+    }
+    
+    // MARK: - Update Like Button
+    
+    private func updateLikeButton() {
+        
+        guard let product = product else {
+            return
+        }
+        
+        let isLiked = DatabaseManager.shared.isProductInCart(
+            productID: product.id
+        )
+        
+        print("Product ID:", product.id)
+        print("Is Liked:", isLiked)
+        
+        if isLiked {
+            
+            // FILLED HEART
+            
+            likeButton.setImage(
+                UIImage(systemName: "heart.fill"),
+                for: .normal
+            )
+            
+        } else {
+            
+            // EMPTY HEART
+            
+            likeButton.setImage(
+                UIImage(systemName: "heart"),
+                for: .normal
+            )
+        }
+        
+        // Make heart PINK
+        likeButton.tintColor = .systemPink
+        
+        // Remove button title
+        likeButton.setTitle("", for: .normal)
+    }
+    
+    // MARK: - LIKE BUTTON
+    
+    @IBAction func likeButtonTapped(_ sender: UIButton) {
+        
+        guard let product = product else {
+            return
+        }
+        
+        let database = DatabaseManager.shared
+        
+        let isAlreadyLiked = database.isProductInCart(
+            productID: product.id
+        )
+        
+        if isAlreadyLiked {
+            
+            database.deleteCartProduct(
+                productID: product.id
+            )
+            
+        } else {
+            
+            let cartProduct = CartProduct(
+                id: product.id,
+                title: product.title,
+                price: product.price,
+                quantity: 1,
+                total: product.price,
+                discountPercentage: 0.0,
+                discountedTotal: 0.0,
+                thumbnail: product.thumbnail
+            )
+            
+            database.saveCartProduct(cartProduct)
+        }
+        
+        updateLikeButton()
     }
 }
