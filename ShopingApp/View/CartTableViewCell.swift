@@ -6,26 +6,24 @@
 //
 
 import UIKit
+import Kingfisher
 
 class CartTableViewCell: UITableViewCell {
 
     
     @IBOutlet weak var cartCardView: UIView!
-    @IBOutlet weak var cartImage: UIImageView!
+    @IBOutlet weak var thumbnail: UIImageView!
     @IBOutlet weak var cartTitle: UILabel!
-    @IBOutlet weak var cartBrand: UILabel!
-    @IBOutlet weak var cartDescription: UILabel!
     @IBOutlet weak var cartPrice: UILabel!
-    @IBOutlet weak var cartRating: UILabel!
-    
-    override func awakeFromNib() {
-        super.awakeFromNib()
-        
-        cartCardView.layer.cornerRadius = 20
-        cartCardView.layer.borderWidth = 0.3
-        cartCardView.layer.shadowOpacity = 0.5
-        cartCardView.layer.shadowOffset.height = 12
-        cartCardView.layer.shadowOffset.width = 12
-    }
+    @IBOutlet weak var quentity : UILabel!
+    @IBOutlet weak var DiscouontPercentage : UILabel!
+    @IBOutlet weak var TotalDiscount: UILabel!
 
-}
+    override func awakeFromNib() {
+            super.awakeFromNib()
+        cartCardView.layer.cornerRadius = 10
+        cartCardView.layer.borderWidth = 0.2
+        cartCardView.layer.shadowOpacity = 0.4
+        cartCardView.layer.shadowOffset = .init(width: 3, height: 3)
+        }
+  }

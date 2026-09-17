@@ -2,35 +2,40 @@ import UIKit
 
 class CollectionViewCell: UICollectionViewCell {
 
+    // MARK: - IBOutlets
     @IBOutlet weak var productIMG: UIImageView!
     @IBOutlet weak var bgView: UIView!
     @IBOutlet weak var titleLBL: UILabel!
     @IBOutlet weak var ratingLBL: UILabel!
     @IBOutlet weak var descriptionLBL: UILabel!
-
+    @IBOutlet weak var likeButton: UIButton!
     
+    // MARK: - Variables
     // Product currently displayed in this cell
     var product: Product?
 
-    // Send selected product to ViewController
+    // Closure to send the selected product back to the ViewController
     var likeProductAction: ((Product) -> Void)?
-    @IBOutlet weak var likeButton: UIButton!
+    
+    // MARK: - Lifecycle
     override func awakeFromNib() {
         super.awakeFromNib()
 
+        // Style the background view
         bgView.layer.borderWidth = 0.3
         bgView.layer.cornerRadius = 18
         bgView.layer.shadowOpacity = 0.5
-        bgView.layer.shadowOffset.height = 12
-        bgView.layer.shadowOffset.width = 12
-
-        ratingLBL.textColor = .systemOrange
-        likeButton.imageView?.image?.withTintColor(.systemPink)
+        bgView.layer.shadowOffset = CGSize(width: 2, height: 2) // Fixed shadow offset
         
+        // Colors
+        ratingLBL.textColor = .systemOrange
+        likeButton.tintColor = .systemGray // Default color before it is liked
     }
 
+    // MARK: - IBActions
     @IBAction func likeProduct(_ sender: UIButton) {
 
+        // Safely unwrap the product
         guard let product = product else {
             print("❌ Product not available")
             return
@@ -39,12 +44,15 @@ class CollectionViewCell: UICollectionViewCell {
         print("❤️ Like button tapped")
         print("Product ID:", product.id)
         print("Product Name:", product.title)
-        // Send this exact product to ViewController
+        print("Product Thunbnail:",product.thumbnail)
+        
+        // 1. Send this exact product to the ViewController to save to SQLite
         likeProductAction?(product)
-        sender.setImage(
-                    UIImage(systemName: "heart.fill"),
-                    for: .normal
-                )
-        sender.tintColor = .systemPink
+        
+        // 2. Instantly update the button UI to show it was liked
+        UIView.animate(withDuration: 0.2) {
+            sender.setImage(UIImage(systemName: "heart.fill"), for: .normal)
+            sender.tintColor = .systemPink
+        }
     }
 }

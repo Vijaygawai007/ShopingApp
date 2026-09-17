@@ -1,26 +1,26 @@
-//
-//  add_To_CartView_Model.swift
-//  ShopingApp
-//
-//  Created by Vijay on 13/09/26.
-//
-
 import Foundation
 import Alamofire
 
-class addToCartViewModel {
+class AddToCartViewModel {
     
-    class var sharedInstance: addToCartViewModel {
+    // 1. Singleton block (Correctly closed!)
+    class var sharedInstance: AddToCartViewModel {
         struct Singleton {
-            static let Instance = addToCartViewModel()
+            static let Instance = AddToCartViewModel()
         }
         return Singleton.Instance
-    }
+    } // 👈 Notice this closing brace. It MUST be here!
     
-    // MARK: - Add Product To Cart
     
-    func addToCart(productID: Int,userID: Int,quantity: Int = 1,completionHandler: @escaping (_ success: AddToCartResponse?,_ failure: String?) -> Void) {
+    // 2. Add Product To Cart (Now safely outside the singleton block)
+    func addToCart(
+        productID: Int,
+        userID: Int,
+        quantity: Int = 1,
+        completionHandler: @escaping (_ success: AddToCartResponse?, _ failure: String?) -> Void
+    ) {
         
+        // Ensure baseURL and Endpoints are defined elsewhere in your project
         let urlString = "\(baseURL)\(Endpoints().add_To_Cart)"
         
         let parameters: [String: Any] = [
@@ -33,51 +33,39 @@ class addToCartViewModel {
             ]
         ]
         
-        AF.request(
-            urlString,
-            method: .post,
-            parameters: parameters,
-            encoding: JSONEncoding.default
-        )
-        .responseData { response in
+        AF.request(urlString, method: .post, parameters: parameters, encoding: JSONEncoding.default).responseData { response in
             
             switch response.result {
-                
             case .success(let data):
-                
                 do {
-                    
                     let decoder = JSONDecoder()
-                    
-                    let responseObject =
-                    try decoder.decode(
+                    let responseObject = try decoder.decode(
                         AddToCartResponse.self,
                         from: data
                     )
                     
-                    print("Product added to cart")
-                    print("Cart ID:", responseObject.id)
+                    print("✅ API Success! Cart ID:", responseObject.id)
                     
+                    // Return success to the View Controller
                     completionHandler(responseObject, nil)
                     
                 } catch {
-                    
-                    print("Decoding Error:", error)
-                    
-                    completionHandler(
-                        nil,
-                        error.localizedDescription
-                    )
+                    print("❌ Decoding Error:", error)
+                    if let decodingError = error as? DecodingError {
+                        switch decodingError {
+                        case .keyNotFound(let key, _): print("❌ Missing key:", key.stringValue)
+                        case .typeMismatch(let type, _): print("❌ Type mismatch:", type)
+                        case .valueNotFound(let type, _): print("❌ Value not found:", type)
+                        case .dataCorrupted(let context): print("❌ Data corrupted:", context.debugDescription)
+                        @unknown default: print("❌ Unknown decoding error")
+                        }
+                    }
+                    completionHandler(nil, error.localizedDescription)
                 }
                 
             case .failure(let error):
-                
-                print("API Error:", error)
-                
-                completionHandler(
-                    nil,
-                    error.localizedDescription
-                )
+                print("❌ API Error:", error)
+                completionHandler(nil, error.localizedDescription)
             }
         }
     }

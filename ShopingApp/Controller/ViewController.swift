@@ -41,79 +41,59 @@ class ViewController: UIViewController {
     
     // MARK: - Compositional Layout
     private func createCompositionalLayout() -> UICollectionViewLayout {
-        // Use [weak self] so we can safely access our `sections` array if needed
         let layout = UICollectionViewCompositionalLayout { [weak self] (sectionIndex, layoutEnvironment) -> NSCollectionLayoutSection? in
             guard let _ = self else { return nil }
             
-            // Layout configuration variables
             var groupWidth: NSCollectionLayoutDimension
-            var groupHeight: NSCollectionLayoutDimension // <-- ADDED FOR DYNAMIC HEIGHT
+            var groupHeight: NSCollectionLayoutDimension
             var orthogonalBehavior: UICollectionLayoutSectionOrthogonalScrollingBehavior
             var isVerticalScrolling: Bool = false
             
-            // 1. --- SECTION-WISE BEHAVIOR, WIDTH, & HEIGHT LOGIC ---
             if sectionIndex == 0 {
-                // Section 0: Horizontal Scrolling
                 groupWidth = .fractionalWidth(0.90)
-                groupHeight = .absolute(220) // Reduced height for section 0
+                groupHeight = .absolute(220)
                 orthogonalBehavior = .groupPaging
-                
             } else if sectionIndex == 1 {
-                // Section 1: Vertical Scrolling
                 groupWidth = .fractionalWidth(1.0)
-                groupHeight = .absolute(260) // Different height for section 1
+                groupHeight = .absolute(260)
                 orthogonalBehavior = .none
                 isVerticalScrolling = true
-                
             } else if sectionIndex == 2 {
-                // Section 2: Vertical Scrolling
                 groupWidth = .fractionalWidth(1.0)
-                groupHeight = .absolute(260) // Different height for section 2
+                groupHeight = .absolute(260)
                 orthogonalBehavior = .none
                 isVerticalScrolling = true
-                
             } else if sectionIndex == 3 {
-                // Section 3: Horizontal Scrolling
                 groupWidth = .fractionalWidth(0.90)
-                groupHeight = .absolute(290) // Smallest height for section 3
+                groupHeight = .absolute(290)
                 orthogonalBehavior = .continuous
-                
             } else {
-                // All other sections: Default
                 groupWidth = .fractionalWidth(0.45)
-                groupHeight = .absolute(270) // Default height
+                groupHeight = .absolute(270)
                 orthogonalBehavior = .continuous
-                
             }
             
-            // 2. Item Setup
             let itemSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                   heightDimension: .fractionalHeight(1.0))
             let item = NSCollectionLayoutItem(layoutSize: itemSize)
             
-            // 3. Group Setup (Apply the dynamic height here)
             let groupSize = NSCollectionLayoutSize(widthDimension: groupWidth,
-                                                   heightDimension: groupHeight) // <-- CHANGED
+                                                   heightDimension: groupHeight)
             let group: NSCollectionLayoutGroup
             
             if isVerticalScrolling {
-                // If it's a vertical section, create a 2-column grid
                 group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitem: item, count: 2)
-                group.interItemSpacing = .fixed(15) // Space between the 2 columns
+                group.interItemSpacing = .fixed(15)
             } else {
-                // If it's a horizontal section, behave normally
                 group = NSCollectionLayoutGroup.horizontal(layoutSize: groupSize, subitems: [item])
             }
             
-            // 4. Section Setup
             let section = NSCollectionLayoutSection(group: group)
             section.interGroupSpacing = 15
             section.contentInsets = NSDirectionalEdgeInsets(top: 15, leading: 15, bottom: 15, trailing: 15)
             
-            // Apply the scrolling behavior decided above
             section.orthogonalScrollingBehavior = orthogonalBehavior
             
-            // 5. Header Setup
             let headerSize = NSCollectionLayoutSize(widthDimension: .fractionalWidth(1.0),
                                                     heightDimension: .absolute(50))
             let header = NSCollectionLayoutBoundarySupplementaryItem(
@@ -147,67 +127,31 @@ class ViewController: UIViewController {
         }
     }
     
-    
-    // MARK: - Add Product To Cart
-    
+    // MARK: - Add Product To Cart (API Call)
     private func addProductToCart(_ product: Product) {
         
-        print("🛒 Adding product to cart")
+        print("🛒 Adding product to cart via API")
         print("Product ID:", product.id)
-        print("Product Name:", product.title)
         
         let userID = 1
         
-        addToCartViewModel.sharedInstance.addToCart(
+        AddToCartViewModel.sharedInstance.addToCart(
             productID: product.id,
             userID: userID,
-            quantity: 1
-        ) { [weak self] response, error in
-            
-            DispatchQueue.main.async {
+            quantity: 1,
+            completionHandler: { [weak self] (response: AddToCartResponse?, error: String?) in
                 
-                if let response = response {
-                    
-                    print("✅ Product added to cart")
-                    print("Cart ID:", response.id)
-                    
-//                    let alert = UIAlertController(
-//                        title: "Added to Cart",
-//                        message: "\(product.title) added successfully.",
-//                        preferredStyle: .alert
-//                    )
-                    
-//                    alert.addAction(
-//                        UIAlertAction(
-//                            title: "OK",
-//                            style: .default
-//                        )
-//                    )
-                    
-//                    self?.present(alert, animated: true)
-                    
-                } else {
-                    
-                    print("❌ Add to cart failed")
-                    print("Error:", error ?? "Unknown error")
-                    
-                    let alert = UIAlertController(
-                        title: "Error",
-                        message: error ?? "Unable to add product.",
-                        preferredStyle: .alert
-                    )
-                    
-                    alert.addAction(
-                        UIAlertAction(
-                            title: "OK",
-                            style: .default
-                        )
-                    )
-                    
-                    self?.present(alert, animated: true)
+                DispatchQueue.main.async {
+                    if let response = response {
+                        print("✅ Product added to cart server. Cart ID:", response.id)
+                        // Optional: Show success alert
+                    } else {
+                        print("❌ Add to cart API failed:", error ?? "Unknown error")
+                        // Optional: Show failure alert
+                    }
                 }
             }
-        }
+        )
     }
 }
 // MARK: - UICollectionView Extension
@@ -220,19 +164,19 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return sections[section].products.count
     }
+    
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         let currentSection = sections[indexPath.section]
-            let selectedProduct = currentSection.products[indexPath.item]
+        let selectedProduct = currentSection.products[indexPath.item]
             
-            guard let detailVC = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController else {
-                return
-            }
+        guard let detailVC = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController else {
+            return
+        }
             
-            // Pass the selected product and section title
-            detailVC.product = selectedProduct
-            detailVC.sectionTitle = currentSection.category
+        detailVC.product = selectedProduct
+        detailVC.sectionTitle = currentSection.category
             
-            navigationController?.pushViewController(detailVC, animated: true)
+        navigationController?.pushViewController(detailVC, animated: true)
     }
     
     func collectionView(
@@ -248,9 +192,7 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
         }
 
         let product = sections[indexPath.section].products[indexPath.item]
-
-        // IMPORTANT:
-        // Tell the cell which product it is displaying
+        
         cell.product = product
 
         cell.titleLBL.text = product.title
@@ -275,16 +217,62 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
             cell.productIMG.contentMode = .scaleAspectFill
         }
         
-
-        // IMPORTANT:
-        // Remove old closure because cells are reused
+        // MARK: - Like Button Action
         cell.likeProductAction = { [weak self] selectedProduct in
-
-            guard let self = self else { return }
-
-            self.addProductToCart(selectedProduct)
+            
+            let productID = selectedProduct.id
+            
+            // Check whether product is already in SQLite cart
+            let isAlreadyInCart = DatabaseManager.shared.isProductInCart(
+                productID: productID
+            )
+            
+            if isAlreadyInCart {
+                
+                // MARK: - DELETE PRODUCT FROM CART
+                
+                DatabaseManager.shared.deleteCartProduct(
+                    productID: productID
+                )
+                
+                // Change heart to unfilled
+                cell.likeButton.setImage(
+                    UIImage(systemName: "heart"),
+                    for: .normal
+                )
+                
+                print("💔 Product removed from cart:", selectedProduct.title)
+                
+            } else {
+                
+                // MARK: - ADD PRODUCT TO CART
+                
+                let itemToSave = CartProduct(
+                    id: selectedProduct.id,
+                    title: selectedProduct.title,
+                    price: selectedProduct.price,
+                    quantity: 1,
+                    total: selectedProduct.price,
+                    discountPercentage: 0.0,
+                    discountedTotal: 0.0,
+                    thumbnail: selectedProduct.thumbnail
+                )
+                
+                // Save product to SQLite
+                DatabaseManager.shared.saveCartProduct(itemToSave)
+                
+                // Change heart to filled
+                cell.likeButton.setImage(
+                    UIImage(systemName: "heart.fill"),
+                    for: .normal
+                )
+                
+                print("❤️ Product added to cart:", selectedProduct.title)
+                
+                // Add product to server cart
+                self?.addProductToCart(selectedProduct)
+            }
         }
-
         return cell
     }
     
@@ -294,17 +282,14 @@ extension ViewController: UICollectionViewDelegate, UICollectionViewDataSource {
                 return UICollectionReusableView()
             }
             
-            // Get the current section data
             let currentSection = sections[indexPath.section]
             header.titleLabel.text = currentSection.category.capitalized
             
-            // Handle the See More button tap
             header.seeMoreAction = { [weak self] in
                 guard let self = self else { return }
                 
                 print("See More tapped for category: \(currentSection.category)")
                 
-                // --- Navigation Action ---
                 let detailVC = UIViewController()
                 detailVC.view.backgroundColor = .white
                 detailVC.title = currentSection.category.capitalized
@@ -323,7 +308,6 @@ class SectionHeaderView: UICollectionReusableView {
     let titleLabel = UILabel()
     let seeMoreButton = UIButton(type: .system)
     
-    // Closure to handle button taps in the ViewController
     var seeMoreAction: (() -> Void)?
     
     override init(frame: CGRect) {
@@ -335,28 +319,22 @@ class SectionHeaderView: UICollectionReusableView {
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
         seeMoreButton.translatesAutoresizingMaskIntoConstraints = false
         
-        // Title Label Styling
         titleLabel.font = UIFont.boldSystemFont(ofSize: 22)
         titleLabel.textColor = .black
         
-        // See More Button Styling
         seeMoreButton.setTitle("See More >>", for: .normal)
         seeMoreButton.titleLabel?.font = UIFont.systemFont(ofSize: 14, weight: .semibold)
         seeMoreButton.setTitleColor(.systemBlue, for: .normal)
         
-        // Button Target
         seeMoreButton.addTarget(self, action: #selector(seeMoreTapped), for: .touchUpInside)
         
         NSLayoutConstraint.activate([
-            // Title Label Constraints (Pinned to left)
             titleLabel.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 15),
             titleLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
             
-            // See More Button Constraints (Pinned to right)
             seeMoreButton.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -15),
             seeMoreButton.centerYAnchor.constraint(equalTo: centerYAnchor),
             
-            // Prevent title from overlapping the button if text is too long
             titleLabel.trailingAnchor.constraint(lessThanOrEqualTo: seeMoreButton.leadingAnchor, constant: -10)
         ])
     }
