@@ -8,5 +8,6 @@ target 'ShopingApp' do
   # Pods for ShopingApp
 pod 'Alamofire'
 pod 'Kingfisher'
+pod 'razorpay-pod'
 
 end
