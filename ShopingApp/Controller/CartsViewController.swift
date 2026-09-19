@@ -86,7 +86,7 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
         
         // MARK: - Price
         if product.price > 0 {
-            cell.cartPrice.text = "$\(product.price)"
+            cell.cartPrice.text = "₹\(product.price)"
         } else {
             cell.cartPrice.text = ""
         }

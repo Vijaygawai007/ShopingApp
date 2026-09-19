@@ -1,20 +1,24 @@
 PODS:
   - Alamofire (5.12.0)
   - Kingfisher (8.12.0)
+  - razorpay-pod (1.2.5)
 
 DEPENDENCIES:
   - Alamofire
   - Kingfisher
+  - razorpay-pod (= 1.2.5)
 
 SPEC REPOS:
   trunk:
     - Alamofire
     - Kingfisher
+    - razorpay-pod
 
 SPEC CHECKSUMS:
   Alamofire: ddb8d5201667b256dbc225f3fc6e835a0753186f
   Kingfisher: 64e06c7d1a9851ecff9d1b14f92ad01141263dae
+  razorpay-pod: aa2df076ea44baab6cc8296c1ccc715fe2ca818c
 
-PODFILE CHECKSUM: dc0a743c89d3ecdae875d5e96a91ce023ca14ed3
+PODFILE CHECKSUM: 24e4d254671b4e42d427b5d4d33a79693e4ccb13
 
 COCOAPODS: 1.17.0

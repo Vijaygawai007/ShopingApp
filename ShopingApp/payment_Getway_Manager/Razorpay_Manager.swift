@@ -1,0 +1,420 @@
+//
+//  RazorpayManager.swift
+//  ShopingApp
+//
+//  Created by Vijay on 18/09/26.
+//
+
+import UIKit
+import Razorpay
+
+// MARK: - Razorpay Manager Delegate
+
+protocol RazorpayManagerDelegate: AnyObject {
+    
+    func razorpayPaymentSuccess(
+        paymentID: String
+    )
+    
+    func razorpayPaymentFailed(
+        code: Int32,
+        message: String
+    )
+}
+// MARK: - Razorpay Manager
+final class RazorpayManager: NSObject {
+
+    // MARK: - Singleton
+    static let shared = RazorpayManager()
+    
+    
+    // MARK: - Razorpay
+    private var razorpay: RazorpayCheckout?
+    
+    
+    // MARK: - Delegate
+    weak var delegate: RazorpayManagerDelegate?
+    
+    
+    // MARK: - Payment State
+    private var isPaymentInProgress = false
+    
+    
+    // MARK: - Private Init
+    
+    private override init() {
+        super.init()
+    }
+    
+    
+    // MARK: - Start Payment
+    
+    func startPayment(
+        viewController: UIViewController,
+        amount: Double,
+        productName: String
+    ) {
+        
+        print("")
+        print("========================================")
+        print("          RAZORPAY START")
+        print("========================================")
+        
+        print("Product:", productName)
+        print("Amount:", amount)
+        
+        
+        // ------------------------------------------------
+//         1. Get Razorpay Test Key
+        // ------------------------------------------------
+        
+        let keyID = payment().test_key2
+        
+        
+        print("Razorpay Key Available:",
+              !keyID.isEmpty)
+        
+        
+        // ------------------------------------------------
+        // 2. Validate Key
+        // ------------------------------------------------
+        
+        guard !keyID.isEmpty else {
+            
+            print("❌ Razorpay Key is empty")
+            
+            delegate?.razorpayPaymentFailed(
+                code: -100,
+                message:
+                    "Razorpay test key is missing."
+            )
+            
+            return
+        }
+        
+        
+        // ------------------------------------------------
+        // 3. Validate Amount
+        // ------------------------------------------------
+        
+        guard amount > 0 else {
+            
+            print("❌ Invalid payment amount")
+            
+            delegate?.razorpayPaymentFailed(
+                code: -101,
+                message:
+                    "Payment amount must be greater than zero."
+            )
+            
+            return
+        }
+        
+        
+        // ------------------------------------------------
+        // 4. Prevent Multiple Payments
+        // ------------------------------------------------
+        
+        guard !isPaymentInProgress else {
+            
+            print(
+                "⚠️ Payment is already in progress."
+            )
+            
+            return
+        }
+        
+        
+        // ------------------------------------------------
+        // 5. Check View Controller
+        // ------------------------------------------------
+        
+        guard viewController.isViewLoaded,
+              viewController.view.window != nil else {
+            
+            print(
+                "❌ ViewController is not visible."
+            )
+            
+            delegate?.razorpayPaymentFailed(
+                code: -102,
+                message:
+                    "Unable to open payment screen."
+            )
+            
+            return
+        }
+        
+        
+        // ------------------------------------------------
+        // 6. Convert INR to Paise
+        // ------------------------------------------------
+        
+        let amountInPaise = Int(
+            (amount * 100).rounded()
+        )
+        
+        
+        print(
+            "Amount in Paise:",
+            amountInPaise
+        )
+        
+        
+        // ------------------------------------------------
+        // 7. Create Razorpay Checkout
+        // ------------------------------------------------
+        
+        razorpay = RazorpayCheckout.initWithKey(
+            keyID,
+            andDelegate: self
+        )
+        
+        
+        print(
+            "✅ RazorpayCheckout created"
+        )
+        
+        
+        // ------------------------------------------------
+        // 8. Set Payment State
+        // ------------------------------------------------
+        
+        isPaymentInProgress = true
+        
+        
+        // ------------------------------------------------
+        // 9. Checkout Options
+        // ------------------------------------------------
+        
+        let options: [String: Any] = [
+            
+            "key": keyID,
+            
+            "amount": amountInPaise,
+            
+            "currency": "INR",
+            
+            "name": "ShopingApp",
+            
+            "description": productName,
+            
+            "prefill": [
+                "name": "Vijay Gawai",
+                "email": "test@example.com",
+                "contact": "9999999999"
+            ],
+            
+            "theme": [
+                "color": "#E30B5D"
+            ]
+        ]
+        
+        
+        print("")
+        print("========================================")
+        print("Opening Razorpay Checkout...")
+        print("========================================")
+        
+        
+        // ------------------------------------------------
+        // 10. Open Checkout
+        // ------------------------------------------------
+        
+        DispatchQueue.main.async { [weak self] in
+            
+            guard let self = self else {
+                return
+            }
+            
+            
+            guard viewController.isViewLoaded,
+                  viewController.view.window != nil else {
+                
+                print(
+                    "❌ ViewController became detached."
+                )
+                
+                self.isPaymentInProgress = false
+                self.razorpay = nil
+                
+                self.delegate?.razorpayPaymentFailed(
+                    code: -103,
+                    message:
+                        "Payment screen could not be opened."
+                )
+                
+                return
+            }
+            
+            
+            self.razorpay?.open(options)
+        }
+    }
+    
+    
+    // MARK: - Release Razorpay
+    
+    private func releaseRazorpay() {
+        
+        print(
+            "Releasing Razorpay instance..."
+        )
+        
+        isPaymentInProgress = false
+        
+        razorpay = nil
+    }
+    
+    
+    // MARK: - Payment Success Handler
+    
+    private func handlePaymentSuccess(
+        paymentID: String
+    ) {
+        
+        print("")
+        print("========================================")
+        print("       ✅ RAZORPAY PAYMENT SUCCESS")
+        print("========================================")
+        
+        print(
+            "Payment ID:",
+            paymentID
+        )
+        
+        
+        // Send result to DetailViewController
+        
+        delegate?.razorpayPaymentSuccess(
+            paymentID: paymentID
+        )
+        
+        
+        // Release Razorpay slightly later
+        
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + 0.5
+        ) { [weak self] in
+            
+            self?.releaseRazorpay()
+        }
+    }
+    
+    
+    // MARK: - Payment Error Handler
+    
+    private func handlePaymentError(
+        code: Int32,
+        message: String
+    ) {
+        
+        print("")
+        print("========================================")
+        print("       ❌ RAZORPAY PAYMENT FAILED")
+        print("========================================")
+        
+        print("Error Code:", code)
+        print("Error Message:", message)
+        
+        
+        // Send result to DetailViewController
+        
+        delegate?.razorpayPaymentFailed(
+            code: code,
+            message: message
+        )
+        
+        
+        // Release Razorpay slightly later
+        
+        DispatchQueue.main.asyncAfter(
+            deadline: .now() + 0.5
+        ) { [weak self] in
+            
+            self?.releaseRazorpay()
+        }
+    }
+}
+
+
+// MARK: - Razorpay Payment Completion
+
+extension RazorpayManager:
+    RazorpayPaymentCompletionProtocol {
+    
+    
+    // MARK: - Payment Error
+    
+    func onPaymentError(
+        _ code: Int32,
+        description str: String
+    ) {
+        
+        print("")
+        print("========================================")
+        print("❌ RAZORPAY ERROR CALLBACK")
+        print("========================================")
+        
+        print("Code:", code)
+        print("Description:", str)
+        
+        
+        // Important:
+        //
+        // Do NOT present UIAlertController here.
+        //
+        // Razorpay's checkout controller may still
+        // be disappearing from the screen.
+        
+        DispatchQueue.main.async { [weak self] in
+            
+            guard let self = self else {
+                return
+            }
+            
+            
+            self.handlePaymentError(
+                code: code,
+                message: str
+            )
+        }
+    }
+    
+    
+    // MARK: - Payment Success
+    
+    func onPaymentSuccess(
+        _ payment_id: String
+    ) {
+        
+        print("")
+        print("========================================")
+        print("✅ RAZORPAY SUCCESS CALLBACK")
+        print("========================================")
+        
+        print(
+            "Payment ID:",
+            payment_id
+        )
+        
+        
+        // Important:
+        //
+        // Do NOT present UIAlertController here.
+        //
+        // Send result to the view controller.
+        
+        DispatchQueue.main.async { [weak self] in
+            
+            guard let self = self else {
+                return
+            }
+            
+            
+            self.handlePaymentSuccess(
+                paymentID: payment_id
+            )
+        }
+    }
+}

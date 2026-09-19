@@ -19,4 +19,9 @@ struct ErrorReason {
     let errorMessage = "something wet wrong go check your model,api request"
 }
 
+struct payment {
+    let Test_Key = "rzp_test_TdSOp4AScARSDr"
+   let test_key2 = "rzp_test_TdSOp4AScARSDr"
+}
 
+//rzp_test_TdSOp4AScARSDr
