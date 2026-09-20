@@ -329,22 +329,12 @@ extension ViewController:
         let selectedProduct =
             currentSection.products[indexPath.item]
         
-        guard let detailVC =
-                storyboard?.instantiateViewController(
-                    withIdentifier: "DetailViewController"
-                ) as? DetailViewController else {
-            
-            return
-        }
+        guard let detailVC = storyboard?.instantiateViewController(withIdentifier: "DetailViewController") as? DetailViewController else {return}
         
         detailVC.product = selectedProduct
         detailVC.sectionTitle = currentSection.category
         
-        navigationController?.pushViewController(
-            detailVC,
-            animated: true
-        )
-    }
+        navigationController?.pushViewController(detailVC,animated: true)}
     
     // MARK: - Cell For Item
     

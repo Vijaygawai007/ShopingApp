@@ -89,7 +89,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="RgB-rA-ILx" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="11" y="885"/>
+            <point key="canvasLocation" x="-702" y="885"/>
         </scene>
         <!--    My Carts-->
         <scene sceneID="PEg-Ma-BOS">
@@ -131,7 +131,7 @@
                                                                 <constraint firstAttribute="height" constant="21" id="FCm-Bp-67H"/>
                                                                 <constraint firstAttribute="width" constant="215" id="w4C-aA-dr5"/>
                                                             </constraints>
-                                                            <fontDescription key="fontDescription" type="system" weight="heavy" pointSize="17"/>
+                                                            <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="17"/>
                                                             <nil key="textColor"/>
                                                             <nil key="highlightedColor"/>
                                                         </label>
@@ -234,7 +234,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="lbZ-fz-YGZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1411" y="885"/>
+            <point key="canvasLocation" x="698" y="885"/>
         </scene>
         <!--Profile-->
         <scene sceneID="pIe-7v-B7E">
@@ -250,7 +250,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="9Oq-sX-GtZ" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2907.6335877862593" y="884.50704225352115"/>
+            <point key="canvasLocation" x="2999" y="885"/>
         </scene>
         <!--Detail View Controller-->
         <scene sceneID="g8D-Co-AIB">
@@ -624,7 +624,7 @@
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="pO7-Oa-lO1" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="3835.8778625954196" y="898.59154929577471"/>
+            <point key="canvasLocation" x="4762.5954198473282" y="898.59154929577471"/>
         </scene>
         <!--Tab Bar Controller-->
         <scene sceneID="K98-wJ-u8u">
@@ -641,7 +641,7 @@
                     <connections>
                         <segue destination="K7N-4u-TCl" kind="relationship" relationship="viewControllers" id="eXf-g2-a1n"/>
                         <segue destination="Djo-U2-xNK" kind="relationship" relationship="viewControllers" id="HSj-BP-DfC"/>
-                        <segue destination="3mS-QQ-Mng" kind="relationship" relationship="viewControllers" id="mVV-f8-oMP"/>
+                        <segue destination="UKn-dy-krK" kind="relationship" relationship="viewControllers" id="mVV-f8-oMP"/>
                         <segue destination="QyE-fv-czM" kind="relationship" relationship="viewControllers" id="8AJ-ux-Yji"/>
                     </connections>
                 </tabBarController>
@@ -649,7 +649,7 @@
             </objects>
             <point key="canvasLocation" x="999" y="96"/>
         </scene>
-        <!--My Orders-->
+        <!--My Orders View Controller-->
         <scene sceneID="1sk-9O-BVr">
             <objects>
                 <viewController storyboardIdentifier="MyOrders_ViewController" useStoryboardIdentifierAsRestorationIdentifier="YES" id="3mS-QQ-Mng" customClass="MyOrders_ViewController" customModule="ShopingApp" customModuleProvider="target" sceneMemberID="viewController">
@@ -661,25 +661,89 @@
                                 <rect key="frame" x="0.0" y="0.0" width="393" height="735"/>
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <prototypes>
-                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" rowHeight="235" id="hKU-pw-vVh">
+                                    <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" restorationIdentifier="MyOrderTableViewCell" insetsLayoutMarginsFromSafeArea="NO" selectionStyle="blue" hidesAccessoryWhenEditing="NO" indentationLevel="1" indentationWidth="0.0" reuseIdentifier="MyOrderTableViewCell" rowHeight="235" id="hKU-pw-vVh" customClass="MyOrderTableViewCell" customModule="ShopingApp" customModuleProvider="target">
                                         <rect key="frame" x="0.0" y="50" width="393" height="235"/>
                                         <autoresizingMask key="autoresizingMask"/>
                                         <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" tableViewCell="hKU-pw-vVh" id="gsj-Sj-edN">
                                             <rect key="frame" x="0.0" y="0.0" width="393" height="235"/>
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
-                                                <visualEffectView opaque="NO" contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="599-d0-ufw">
+                                                <view contentMode="scaleToFill" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="Ej5-5q-3YU">
                                                     <rect key="frame" x="20" y="15" width="353" height="205"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                                    <view key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="wGO-VI-ejP">
-                                                        <rect key="frame" x="0.0" y="0.0" width="353" height="205"/>
-                                                        <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
-                                                    </view>
                                                     <color key="backgroundColor" systemColor="systemGray5Color"/>
-                                                    <blurEffect style="regular"/>
-                                                </visualEffectView>
+                                                </view>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="qtyLBL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="ZDz-bE-fgl">
+                                                    <rect key="frame" x="177" y="125" width="188" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="thin" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="order ID" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="zXM-qe-NwP">
+                                                    <rect key="frame" x="177" y="67" width="188" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="thin" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Product NameLBL" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="JQp-6o-SQ3">
+                                                    <rect key="frame" x="177" y="38" width="188" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="thin" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="statusLBL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="LM3-9E-zEX">
+                                                    <rect key="frame" x="236" y="177" width="129" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="semibold" pointSize="13"/>
+                                                    <color key="textColor" red="0.10280752996791914" green="0.74322332517065182" blue="0.0044423270948129928" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="orderIDLBL" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SgI-fS-geM">
+                                                    <rect key="frame" x="177" y="96" width="188" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="thin" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="totalLBL" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2t1-cD-wwI">
+                                                    <rect key="frame" x="236" y="154" width="129" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="thin" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Total" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Dc2-4K-BFZ">
+                                                    <rect key="frame" x="177" y="154" width="51" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="thin" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Status" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="xcK-C4-Bpo">
+                                                    <rect key="frame" x="177" y="177" width="51" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" weight="thin" pointSize="13"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <imageView clipsSubviews="YES" userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" translatesAutoresizingMaskIntoConstraints="NO" id="aen-O6-cbH">
+                                                    <rect key="frame" x="34" y="38" width="135" height="160"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                </imageView>
                                             </subviews>
                                         </tableViewCellContentView>
+                                        <connections>
+                                            <outlet property="cards" destination="Ej5-5q-3YU" id="BVL-lz-09z"/>
+                                            <outlet property="orderIDLabel" destination="SgI-fS-geM" id="5EC-rp-zNB"/>
+                                            <outlet property="orderImg" destination="aen-O6-cbH" id="nhW-GG-5DS"/>
+                                            <outlet property="productNameLabel" destination="JQp-6o-SQ3" id="bDn-4K-zEF"/>
+                                            <outlet property="quantityLabel" destination="ZDz-bE-fgl" id="vcr-vk-gJE"/>
+                                            <outlet property="statusLabel" destination="LM3-9E-zEX" id="Tb2-vR-gTV"/>
+                                            <outlet property="totalLabel" destination="2t1-cD-wwI" id="Ocs-gv-eb7"/>
+                                        </connections>
                                     </tableViewCell>
                                 </prototypes>
                             </tableView>
@@ -693,11 +757,14 @@
                             <constraint firstItem="uBW-s1-LXS" firstAttribute="bottom" secondItem="Tn4-iv-aej" secondAttribute="bottom" id="z8P-9t-JdH"/>
                         </constraints>
                     </view>
-                    <tabBarItem key="tabBarItem" title="My Orders" image="shippingbox" catalog="system" selectedImage="shippingbox.fill" id="nSl-7x-iZ8"/>
+                    <navigationItem key="navigationItem" id="gTb-he-TL0"/>
+                    <connections>
+                        <outlet property="my_Orders" destination="Tn4-iv-aej" id="u4o-HN-htn"/>
+                    </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="JCi-d7-Jq3" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="2257.2519083969464" y="884.50704225352115"/>
+            <point key="canvasLocation" x="2212.9770992366412" y="884.50704225352115"/>
         </scene>
         <!--Cart-->
         <scene sceneID="rGY-GV-IRt">
@@ -722,7 +789,26 @@
                 </navigationController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="UqL-cj-HfW" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="664.8854961832061" y="884.50704225352115"/>
+            <point key="canvasLocation" x="-47" y="885"/>
+        </scene>
+        <!--My Orders-->
+        <scene sceneID="W3r-rE-gEJ">
+            <objects>
+                <navigationController automaticallyAdjustsScrollViewInsets="NO" id="UKn-dy-krK" sceneMemberID="viewController">
+                    <tabBarItem key="tabBarItem" title="My Orders" image="shippingbox" catalog="system" selectedImage="shippingbox.fill" id="nSl-7x-iZ8"/>
+                    <toolbarItems/>
+                    <navigationBar key="navigationBar" contentMode="scaleToFill" id="NSe-mY-4Lk">
+                        <rect key="frame" x="0.0" y="118" width="393" height="54"/>
+                        <autoresizingMask key="autoresizingMask"/>
+                    </navigationBar>
+                    <nil name="viewControllers"/>
+                    <connections>
+                        <segue destination="3mS-QQ-Mng" kind="relationship" relationship="rootViewController" id="P6Q-sO-v9W"/>
+                    </connections>
+                </navigationController>
+                <placeholder placeholderIdentifier="IBFirstResponder" id="LmK-jN-ijm" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>
+            </objects>
+            <point key="canvasLocation" x="1521" y="885"/>
         </scene>
     </scenes>
     <resources>

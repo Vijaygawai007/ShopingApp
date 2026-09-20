@@ -22,6 +22,7 @@ class CartViewController: UIViewController {
         cartTable.dataSource = self
         cartTable.rowHeight = UITableView.automaticDimension
 //            cartTable.estimatedRowHeight = 130
+        cartTable.showsVerticalScrollIndicator = false
         fetchCart()
     }
 
@@ -65,10 +66,7 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
         return cartProducts.count
     }
 
-    func tableView(
-        _ tableView: UITableView,
-        cellForRowAt indexPath: IndexPath
-    ) -> UITableViewCell {
+    func tableView(_ tableView: UITableView,cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         
         let cell = tableView.dequeueReusableCell(
             withIdentifier: "CartTableViewCell",
@@ -114,10 +112,7 @@ extension CartViewController: UITableViewDelegate, UITableViewDataSource {
         return cell
     }
 
-    func tableView(
-        _ tableView: UITableView,
-        heightForRowAt indexPath: IndexPath
-    ) -> CGFloat {
+    func tableView(_ tableView: UITableView,heightForRowAt indexPath: IndexPath) -> CGFloat {
 
         let product = cartProducts[indexPath.row]
 
