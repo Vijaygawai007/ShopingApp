@@ -21,23 +21,35 @@ protocol RazorpayManagerDelegate: AnyObject {
         message: String
     )
 }
-// MARK: - Razorpay Manager
-final class RazorpayManager: NSObject {
 
+// MARK: - Razorpay Manager
+
+final class RazorpayManager: NSObject {
+    
     // MARK: - Singleton
+    
     static let shared = RazorpayManager()
     
     
     // MARK: - Razorpay
+    
     private var razorpay: RazorpayCheckout?
     
     
     // MARK: - Delegate
+    
     weak var delegate: RazorpayManagerDelegate?
     
     
     // MARK: - Payment State
+    
     private var isPaymentInProgress = false
+    
+    
+    // MARK: - Purchased Product
+    
+    // Product that is being paid for
+    private var purchasedProduct: Product?
     
     
     // MARK: - Private Init
@@ -52,7 +64,8 @@ final class RazorpayManager: NSObject {
     func startPayment(
         viewController: UIViewController,
         amount: Double,
-        productName: String
+        productName: String,
+        product: Product
     ) {
         
         print("")
@@ -60,33 +73,44 @@ final class RazorpayManager: NSObject {
         print("          RAZORPAY START")
         print("========================================")
         
-        print("Product:", productName)
+        print("Product ID:", product.id)
+        print("Product:", product.title)
         print("Amount:", amount)
         
         
         // ------------------------------------------------
-//         1. Get Razorpay Test Key
+        // 1. Store Product
+        // ------------------------------------------------
+        
+        purchasedProduct = product
+        
+        
+        // ------------------------------------------------
+        // 2. Get Razorpay Test Key
         // ------------------------------------------------
         
         let keyID = payment().test_key2
         
         
-        print("Razorpay Key Available:",
-              !keyID.isEmpty)
+        print(
+            "Razorpay Key Available:",
+            !keyID.isEmpty
+        )
         
         
         // ------------------------------------------------
-        // 2. Validate Key
+        // 3. Validate Key
         // ------------------------------------------------
         
         guard !keyID.isEmpty else {
             
             print("❌ Razorpay Key is empty")
             
+            purchasedProduct = nil
+            
             delegate?.razorpayPaymentFailed(
                 code: -100,
-                message:
-                    "Razorpay test key is missing."
+                message: "Razorpay test key is missing."
             )
             
             return
@@ -94,17 +118,18 @@ final class RazorpayManager: NSObject {
         
         
         // ------------------------------------------------
-        // 3. Validate Amount
+        // 4. Validate Amount
         // ------------------------------------------------
         
         guard amount > 0 else {
             
             print("❌ Invalid payment amount")
             
+            purchasedProduct = nil
+            
             delegate?.razorpayPaymentFailed(
                 code: -101,
-                message:
-                    "Payment amount must be greater than zero."
+                message: "Payment amount must be greater than zero."
             )
             
             return
@@ -112,34 +137,31 @@ final class RazorpayManager: NSObject {
         
         
         // ------------------------------------------------
-        // 4. Prevent Multiple Payments
+        // 5. Prevent Multiple Payments
         // ------------------------------------------------
         
         guard !isPaymentInProgress else {
             
-            print(
-                "⚠️ Payment is already in progress."
-            )
+            print("⚠️ Payment is already in progress.")
             
             return
         }
         
         
         // ------------------------------------------------
-        // 5. Check View Controller
+        // 6. Check View Controller
         // ------------------------------------------------
         
         guard viewController.isViewLoaded,
               viewController.view.window != nil else {
             
-            print(
-                "❌ ViewController is not visible."
-            )
+            print("❌ ViewController is not visible.")
+            
+            purchasedProduct = nil
             
             delegate?.razorpayPaymentFailed(
                 code: -102,
-                message:
-                    "Unable to open payment screen."
+                message: "Unable to open payment screen."
             )
             
             return
@@ -147,7 +169,7 @@ final class RazorpayManager: NSObject {
         
         
         // ------------------------------------------------
-        // 6. Convert INR to Paise
+        // 7. Convert INR to Paise
         // ------------------------------------------------
         
         let amountInPaise = Int(
@@ -162,7 +184,7 @@ final class RazorpayManager: NSObject {
         
         
         // ------------------------------------------------
-        // 7. Create Razorpay Checkout
+        // 8. Create Razorpay Checkout
         // ------------------------------------------------
         
         razorpay = RazorpayCheckout.initWithKey(
@@ -171,20 +193,18 @@ final class RazorpayManager: NSObject {
         )
         
         
-        print(
-            "✅ RazorpayCheckout created"
-        )
+        print("✅ RazorpayCheckout created")
         
         
         // ------------------------------------------------
-        // 8. Set Payment State
+        // 9. Set Payment State
         // ------------------------------------------------
         
         isPaymentInProgress = true
         
         
         // ------------------------------------------------
-        // 9. Checkout Options
+        // 10. Checkout Options
         // ------------------------------------------------
         
         let options: [String: Any] = [
@@ -206,7 +226,7 @@ final class RazorpayManager: NSObject {
             ],
             
             "theme": [
-                "color": "#E30B5D"
+                "color": "#E30B"
             ]
         ]
         
@@ -218,7 +238,7 @@ final class RazorpayManager: NSObject {
         
         
         // ------------------------------------------------
-        // 10. Open Checkout
+        // 11. Open Checkout
         // ------------------------------------------------
         
         DispatchQueue.main.async { [weak self] in
@@ -231,17 +251,15 @@ final class RazorpayManager: NSObject {
             guard viewController.isViewLoaded,
                   viewController.view.window != nil else {
                 
-                print(
-                    "❌ ViewController became detached."
-                )
+                print("❌ ViewController became detached.")
                 
                 self.isPaymentInProgress = false
                 self.razorpay = nil
+                self.purchasedProduct = nil
                 
                 self.delegate?.razorpayPaymentFailed(
                     code: -103,
-                    message:
-                        "Payment screen could not be opened."
+                    message: "Payment screen could not be opened."
                 )
                 
                 return
@@ -257,9 +275,7 @@ final class RazorpayManager: NSObject {
     
     private func releaseRazorpay() {
         
-        print(
-            "Releasing Razorpay instance..."
-        )
+        print("Releasing Razorpay instance...")
         
         isPaymentInProgress = false
         
@@ -318,6 +334,12 @@ final class RazorpayManager: NSObject {
         print("Error Message:", message)
         
         
+        // Payment failed.
+        // Do NOT save the product into Orders.
+        
+        purchasedProduct = nil
+        
+        
         // Send result to DetailViewController
         
         delegate?.razorpayPaymentFailed(
@@ -340,8 +362,7 @@ final class RazorpayManager: NSObject {
 
 // MARK: - Razorpay Payment Completion
 
-extension RazorpayManager:
-    RazorpayPaymentCompletionProtocol {
+extension RazorpayManager: RazorpayPaymentCompletionProtocol {
     
     
     // MARK: - Payment Error
@@ -399,11 +420,56 @@ extension RazorpayManager:
         )
         
         
-        // Important:
-        //
-        // Do NOT present UIAlertController here.
-        //
-        // Send result to the view controller.
+        // ------------------------------------------------
+        // SAVE PRODUCT ONLY AFTER PAYMENT SUCCESS
+        // ------------------------------------------------
+        
+        guard let product = purchasedProduct else {
+            
+            print("❌ Payment succeeded but product was not found.")
+            
+            DispatchQueue.main.async { [weak self] in
+                
+                self?.handlePaymentSuccess(
+                    paymentID: payment_id
+                )
+            }
+            
+            return
+        }
+        
+        
+        print("")
+        print("========================================")
+        print("💾 SAVING ORDER IN SQLITE")
+        print("========================================")
+        
+        print("Product ID:", product.id)
+        print("Product Name:", product.title)
+        print("Product Price:", product.price)
+        print("Payment ID:", payment_id)
+        print("Thumbnail:", product.thumbnail)
+        
+        
+        // Save purchased product into SQLite
+        OrderSQLiteManager.shared.saveOrder(
+            productID: product.id,
+            productName: product.title,
+            quantity: 1,
+            price: product.price,
+            paymentID: payment_id,
+            thumbnail: product.thumbnail
+        )
+        
+        
+        print("========================================")
+        print("✅ PRODUCT SAVED AS ORDER")
+        print("========================================")
+        
+        
+        // ------------------------------------------------
+        // Send success result to ViewController
+        // ------------------------------------------------
         
         DispatchQueue.main.async { [weak self] in
             
