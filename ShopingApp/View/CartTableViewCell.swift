@@ -21,7 +21,7 @@ class CartTableViewCell: UITableViewCell {
 
     override func awakeFromNib() {
             super.awakeFromNib()
-        cartCardView.layer.cornerRadius = 10
+        cartCardView.layer.cornerRadius = 20
         cartCardView.layer.borderWidth = 0.2
         cartCardView.layer.shadowOpacity = 0.4
         cartCardView.layer.shadowOffset = .init(width: 3, height: 3)

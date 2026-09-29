@@ -20,8 +20,22 @@ struct ErrorReason {
 }
 
 struct payment {
-    let Test_Key = "rzp_test_TdSOp4AScARSDr"
-   let test_key2 = "rzp_test_TdSOp4AScARSDr"
+//    let Test_Key = "rzp_test_TdSOp4AScARSDr"
+    let test_key2 = "rzp_test_TdSOp4AScARSDr"
 }
 
-//rzp_test_TdSOp4AScARSDr
+// MARK: - Product Section Model
+
+struct ProductSection {
+    let category: String
+    var products: [Product]
+}
+
+
+
+
+
+
+
+
+
