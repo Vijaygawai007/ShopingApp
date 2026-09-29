@@ -1,6 +1,6 @@
 # Uncomment the next line to define a global platform for your project
 # platform :ios, '9.0'
-
+pod 'Supabase'
 target 'ShopingApp' do
   # Comment the next line if you don't want to use dynamic frameworks
   use_frameworks!
@@ -9,5 +9,6 @@ target 'ShopingApp' do
 pod 'Alamofire'
 pod 'Kingfisher'
 pod 'razorpay-pod'
+
 
 end

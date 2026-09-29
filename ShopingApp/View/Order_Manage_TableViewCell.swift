@@ -17,7 +17,7 @@ class MyOrderTableViewCell: UITableViewCell {
         orderImg.layer.cornerRadius = 8
         orderImg.clipsToBounds = true
         orderImg.contentMode = .scaleAspectFill
-        cards.layer.cornerRadius = 10
+        cards.layer.cornerRadius = 20
         cards.layer.borderWidth = 0.2
         cards.layer.shadowOpacity = 0.4
         cards.layer.shadowOffset = .init(width: 3, height: 3)
@@ -35,7 +35,8 @@ class MyOrderTableViewCell: UITableViewCell {
         orderIDLabel.text = "Order #\(order.orderID)"
         productNameLabel.text = order.productName
         quantityLabel.text = "Qty: \(order.quantity)"
-        totalLabel.text = "₹\(String(format: "%.2f", order.total))"
+//        totalLabel.text = "₹\(String(format: "%.2f", order.total))"
+        totalLabel.text = "$\(order.total)"
         statusLabel.text = order.status
         
         if let url = URL(string: order.thumbnail) {

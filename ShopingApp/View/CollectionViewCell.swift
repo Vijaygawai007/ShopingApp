@@ -24,11 +24,11 @@ class CollectionViewCell: UICollectionViewCell {
         // Style the background view
         bgView.layer.borderWidth = 0.3
         bgView.layer.cornerRadius = 18
-        bgView.layer.shadowOpacity = 0.5
+        bgView.layer.shadowOpacity = 0.8
         bgView.layer.shadowOffset = CGSize(width: 2, height: 2) // Fixed shadow offset
         
         // Colors
-        ratingLBL.textColor = .systemOrange
+        ratingLBL.textColor = .systemPink
         likeButton.tintColor = .systemGray // Default color before it is liked
     }
 
