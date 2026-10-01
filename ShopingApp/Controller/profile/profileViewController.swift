@@ -1,4 +1,3 @@
-
 //
 //  profileViewController.swift
 //  ShopingApp
@@ -10,7 +9,6 @@ import UIKit
 import Supabase
 import Kingfisher
 import PhotosUI
-
 
 @MainActor
 class profileViewController:
@@ -36,17 +34,41 @@ class profileViewController:
 
     // MARK: - Properties
 
-    private var userProfile: Profile?
+    private var userProfile: Profilee?
 
     private var isFetchingProfile = false
-
     private var isUploadingProfileImage = false
+
+
+    // MARK: - Database Models
+
+    private struct ProfileImageUpdate: Encodable {
+
+        let profileImage: String
+
+        enum CodingKeys: String, CodingKey {
+            case profileImage = "profile_image"
+        }
+    }
+
+
+    private struct ProfileTextUpdate: Encodable {
+
+        let fullName: String
+        let phone: String
+        let address: String
+
+        enum CodingKeys: String, CodingKey {
+            case fullName = "full_name"
+            case phone
+            case address
+        }
+    }
 
 
     // MARK: - View Lifecycle
 
     override func viewDidLoad() {
-
         super.viewDidLoad()
 
         setupCards()
@@ -57,7 +79,6 @@ class profileViewController:
     override func viewDidAppear(
         _ animated: Bool
     ) {
-
         super.viewDidAppear(animated)
 
         guard !isUploadingProfileImage else {
@@ -69,7 +90,6 @@ class profileViewController:
 
 
     override func viewDidLayoutSubviews() {
-
         super.viewDidLayoutSubviews()
 
         profileImageView.layer.cornerRadius =
@@ -83,17 +103,26 @@ class profileViewController:
 
     private func setupCards() {
 
-        info_card.layer.cornerRadius = 10
+        profileImageView.layer.borderWidth = 2
+        profileImageView.layer.shadowOffset = .init(width: 6, height: 6)
+
+        info_card.layer.cornerRadius = 20
         info_card.layer.borderWidth = 0.2
-        info_card.layer.shadowOpacity = 0.08
+        info_card.layer.shadowOpacity = 0.4
 
-        address_card.layer.cornerRadius = 10
+        address_card.layer.cornerRadius = 20
         address_card.layer.borderWidth = 0.2
-        address_card.layer.shadowOpacity = 0.06
+        address_card.layer.shadowOpacity = 0.4
 
-        profileBG_View.layer.cornerRadius = 40
-        profileBG_View.layer.shadowOpacity = 0.10
-        profileBG_View.layer.borderWidth = 5
+        profileBG_View.layer.cornerRadius = 20
+        profileBG_View.layer.borderWidth = 0.2
+        profileBG_View.layer.shadowOpacity = 0.4
+
+        profileBG_View.layer.shadowOffset =
+            CGSize(
+                width: 3,
+                height: 3
+            )
 
         logoutButton.layer.shadowOffset =
             CGSize(
@@ -116,7 +145,9 @@ class profileViewController:
         profileImageView.contentMode =
             .scaleAspectFill
 
-        profileImageView.clipsToBounds = true
+        profileImageView.clipsToBounds =
+            true
+       
 
         nameLabel.text = ""
         mobileLabel.text = ""
@@ -132,11 +163,11 @@ class profileViewController:
 
     private func fetchUserProfile() {
 
-        if isFetchingProfile {
+        guard !isFetchingProfile else {
             return
         }
 
-        if isUploadingProfileImage {
+        guard !isUploadingProfileImage else {
             return
         }
 
@@ -150,9 +181,9 @@ class profileViewController:
 
             do {
 
-                // -----------------------------------------
-                // Get logged-in user
-                // -----------------------------------------
+                // =========================================
+                // STEP 1 - CURRENT USER
+                // =========================================
 
                 let user =
                     try await
@@ -160,19 +191,23 @@ class profileViewController:
                     .auth
                     .user()
 
+                let userID =
+                    user.id.uuidString
 
+
+                print("")
                 print("===================================")
-                print("LOGGED IN USER")
-                print("User ID: \(user.id)")
+                print("FETCH USER")
+                print("User ID: \(userID)")
                 print("Email: \(user.email ?? "No Email")")
                 print("===================================")
 
 
-                // -----------------------------------------
-                // Fetch profile
-                // -----------------------------------------
+                // =========================================
+                // STEP 2 - PROFILE
+                // =========================================
 
-                let profile: Profile =
+                let profile: Profilee =
                     try await
                     SupabaseManager.shared.client
                     .from("profiles")
@@ -180,13 +215,14 @@ class profileViewController:
                     .eq(
                         "id",
                         value:
-                            user.id.uuidString
+                            userID
                     )
                     .single()
                     .execute()
                     .value
 
 
+                print("")
                 print("===================================")
                 print("PROFILE FETCHED")
                 print("Name: \(profile.fullName)")
@@ -196,23 +232,30 @@ class profileViewController:
                     "Address: \(profile.address ?? "No Address")"
                 )
                 print(
-                    "Profile Image: \(profile.profileImage ?? "NULL")"
+                    "Profile Image: " +
+                    "\(profile.profileImage ?? "NULL")"
                 )
                 print("===================================")
 
 
-                userProfile = profile
+                userProfile =
+                    profile
 
-                displayProfile(profile)
-
+                displayProfile(
+                    profile
+                )
 
             } catch {
 
+                print("")
                 print("===================================")
                 print("❌ PROFILE FETCH ERROR")
                 print(error)
-                print(error.localizedDescription)
+                print(
+                    error.localizedDescription
+                )
                 print("===================================")
+
 
                 showAlert(
                     title:
@@ -228,12 +271,10 @@ class profileViewController:
     // MARK: - Display Profile
 
     private func displayProfile(
-        _ profile: Profile
+        _ profile: Profilee
     ) {
 
-        // -----------------------------------------
         // Name
-        // -----------------------------------------
 
         if profile.fullName.isEmpty {
 
@@ -247,9 +288,7 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
         // Phone
-        // -----------------------------------------
 
         if profile.phone.isEmpty {
 
@@ -263,9 +302,7 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
         // Email
-        // -----------------------------------------
 
         if profile.email.isEmpty {
 
@@ -279,11 +316,11 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
         // Address
-        // -----------------------------------------
 
-        if let address = profile.address,
+        if let address =
+            profile.address,
+
            !address
             .trimmingCharacters(
                 in:
@@ -301,18 +338,18 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
-        // Profile Image
-        // -----------------------------------------
+        // Profile image
 
-        loadProfileImage(profile)
+        loadProfileImage(
+            profile
+        )
     }
 
 
     // MARK: - Load Profile Image
 
     private func loadProfileImage(
-        _ profile: Profile
+        _ profile: Profilee
     ) {
 
         let defaultImage =
@@ -338,12 +375,13 @@ class profileViewController:
                     string:
                         imageString
                 )
-
         else {
 
             print(
-                "ℹ️ No profile image URL in database"
+                "ℹ️ profile_image is NULL"
             )
+
+            profileImageView.kf.cancelDownloadTask()
 
             profileImageView.image =
                 defaultImage
@@ -352,11 +390,20 @@ class profileViewController:
         }
 
 
+        print("")
         print("===================================")
         print("LOADING PROFILE IMAGE")
         print(imageString)
         print("===================================")
 
+
+        // Cancel previous image request.
+
+        profileImageView.kf.cancelDownloadTask()
+
+
+        // Force refresh because the same
+        // USER_ID.jpg file is overwritten.
 
         profileImageView.kf.setImage(
             with:
@@ -364,10 +411,14 @@ class profileViewController:
             placeholder:
                 defaultImage,
             options: [
+
+                .forceRefresh,
+
+                .cacheOriginalImage,
+
                 .transition(
                     .fade(0.2)
-                ),
-                .cacheOriginalImage
+                )
             ]
         )
     }
@@ -405,7 +456,7 @@ class profileViewController:
     // MARK: - Edit Profile Alert
 
     private func showEditProfileAlert(
-        profile: Profile
+        profile: Profilee
     ) {
 
         let alert =
@@ -419,9 +470,7 @@ class profileViewController:
             )
 
 
-        // -----------------------------------------
-        // Full Name
-        // -----------------------------------------
+        // Name
 
         alert.addTextField { textField in
 
@@ -436,9 +485,7 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
-        // Mobile
-        // -----------------------------------------
+        // Phone
 
         alert.addTextField { textField in
 
@@ -453,9 +500,7 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
         // Address
-        // -----------------------------------------
 
         alert.addTextField { textField in
 
@@ -470,9 +515,7 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
         // Change Profile Picture
-        // -----------------------------------------
 
         alert.addAction(
             UIAlertAction(
@@ -482,14 +525,15 @@ class profileViewController:
                     .default
             ) { [weak self] _ in
 
-                self?.openImagePicker()
+                DispatchQueue.main.async {
+
+                    self?.openImagePicker()
+                }
             }
         )
 
 
-        // -----------------------------------------
         // Cancel
-        // -----------------------------------------
 
         alert.addAction(
             UIAlertAction(
@@ -501,9 +545,7 @@ class profileViewController:
         )
 
 
-        // -----------------------------------------
         // Save
-        // -----------------------------------------
 
         alert.addAction(
             UIAlertAction(
@@ -516,6 +558,7 @@ class profileViewController:
                 guard
                     let self =
                         self,
+
                     let alert =
                         alert
                 else {
@@ -524,7 +567,9 @@ class profileViewController:
 
 
                 let name =
-                    alert.textFields?[0].text?
+                    alert
+                    .textFields?[0]
+                    .text?
                     .trimmingCharacters(
                         in:
                             .whitespacesAndNewlines
@@ -533,7 +578,9 @@ class profileViewController:
 
 
                 let phone =
-                    alert.textFields?[1].text?
+                    alert
+                    .textFields?[1]
+                    .text?
                     .trimmingCharacters(
                         in:
                             .whitespacesAndNewlines
@@ -542,7 +589,9 @@ class profileViewController:
 
 
                 let address =
-                    alert.textFields?[2].text?
+                    alert
+                    .textFields?[2]
+                    .text?
                     .trimmingCharacters(
                         in:
                             .whitespacesAndNewlines
@@ -550,11 +599,7 @@ class profileViewController:
                     ?? ""
 
 
-                // -----------------------------------------
-                // Validate Name
-                // -----------------------------------------
-
-                if name.isEmpty {
+                guard !name.isEmpty else {
 
                     self.showAlert(
                         title:
@@ -567,11 +612,7 @@ class profileViewController:
                 }
 
 
-                // -----------------------------------------
-                // Validate Phone
-                // -----------------------------------------
-
-                if phone.isEmpty {
+                guard !phone.isEmpty else {
 
                     self.showAlert(
                         title:
@@ -583,10 +624,6 @@ class profileViewController:
                     return
                 }
 
-
-                // -----------------------------------------
-                // Update Profile
-                // -----------------------------------------
 
                 self.updateProfile(
                     name:
@@ -623,9 +660,6 @@ class profileViewController:
 
         configuration.selectionLimit =
             1
-
-        // Avoid requesting unnecessary
-        // original high-resolution data.
 
         configuration.preferredAssetRepresentationMode =
             .current
@@ -749,17 +783,13 @@ class profileViewController:
 
             Task { @MainActor in
 
-                // -----------------------------------------
-                // Show image immediately
-                // -----------------------------------------
+                // Show image immediately.
 
                 self.profileImageView.image =
                     image
 
 
-                // -----------------------------------------
-                // Upload image
-                // -----------------------------------------
+                // Upload image.
 
                 await self.uploadProfileImage(
                     image
@@ -776,16 +806,16 @@ class profileViewController:
         maxDimension: CGFloat
     ) -> UIImage {
 
-        let originalWidth =
+        let width =
             image.size.width
 
-        let originalHeight =
+        let height =
             image.size.height
 
 
         guard
-            originalWidth > maxDimension ||
-            originalHeight > maxDimension
+            width > maxDimension ||
+            height > maxDimension
         else {
 
             return image
@@ -794,17 +824,17 @@ class profileViewController:
 
         let scale =
             min(
-                maxDimension / originalWidth,
-                maxDimension / originalHeight
+                maxDimension / width,
+                maxDimension / height
             )
 
 
         let newSize =
             CGSize(
                 width:
-                    originalWidth * scale,
+                    width * scale,
                 height:
-                    originalHeight * scale
+                    height * scale
             )
 
 
@@ -830,23 +860,15 @@ class profileViewController:
     }
 
 
-    // MARK: - Prepare Profile Image
+    // MARK: - Prepare Image
 
     private func prepareProfileImage(
         _ image: UIImage
     ) -> Data? {
 
-        // -----------------------------------------
-        // Maximum upload size
-        // -----------------------------------------
-
         let maximumBytes =
             500 * 1024
 
-
-        // -----------------------------------------
-        // Start with 1000px image
-        // -----------------------------------------
 
         var currentImage =
             resizeProfileImage(
@@ -856,11 +878,7 @@ class profileViewController:
             )
 
 
-        // -----------------------------------------
-        // Compression qualities
-        // -----------------------------------------
-
-        let compressionValues:
+        let qualities:
             [CGFloat] = [
 
                 0.80,
@@ -873,11 +891,9 @@ class profileViewController:
             ]
 
 
-        // -----------------------------------------
-        // Try compression first
-        // -----------------------------------------
+        // First compression.
 
-        for quality in compressionValues {
+        for quality in qualities {
 
             guard
                 let data =
@@ -895,7 +911,8 @@ class profileViewController:
             )
 
             print(
-                "JPEG Size: \(data.count / 1024) KB"
+                "JPEG Size: " +
+                "\(data.count / 1024) KB"
             )
 
 
@@ -910,33 +927,30 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
-        // Still too large.
-        //
-        // Reduce image dimensions gradually.
-        // -----------------------------------------
+        // Reduce dimensions.
 
-        var currentDimension:
+        var dimension:
             CGFloat = 800
 
 
-        while currentDimension >= 300 {
+        while dimension >= 300 {
 
             currentImage =
                 resizeProfileImage(
                     image,
                     maxDimension:
-                        currentDimension
+                        dimension
                 )
 
 
-            // Try several qualities again.
-
-            for quality in
-                [CGFloat(0.50),
-                 CGFloat(0.40),
-                 CGFloat(0.30),
-                 CGFloat(0.20)] {
+            for quality:
+                CGFloat in
+                [
+                    0.50,
+                    0.40,
+                    0.30,
+                    0.20
+                ] {
 
                 guard
                     let data =
@@ -950,15 +964,16 @@ class profileViewController:
 
 
                 print(
-                    "Resize Dimension: \(currentDimension)"
+                    "Dimension: \(dimension)"
                 )
 
                 print(
-                    "JPEG Quality: \(quality)"
+                    "Quality: \(quality)"
                 )
 
                 print(
-                    "JPEG Size: \(data.count / 1024) KB"
+                    "Size: " +
+                    "\(data.count / 1024) KB"
                 )
 
 
@@ -973,15 +988,11 @@ class profileViewController:
             }
 
 
-            currentDimension -= 100
+            dimension -= 100
         }
 
 
-        // -----------------------------------------
         // Final fallback.
-        //
-        // Use a small 300px image.
-        // -----------------------------------------
 
         currentImage =
             resizeProfileImage(
@@ -1004,11 +1015,9 @@ class profileViewController:
         _ image: UIImage
     ) async {
 
-        // -----------------------------------------
-        // Prevent duplicate upload
-        // -----------------------------------------
-
-        guard !isUploadingProfileImage else {
+        guard
+            !isUploadingProfileImage
+        else {
 
             print(
                 "⚠️ IMAGE UPLOAD ALREADY RUNNING"
@@ -1018,15 +1027,9 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
-        // Prepare image
-        // -----------------------------------------
-
         guard
             let imageData =
-                prepareProfileImage(
-                    image
-                )
+                prepareProfileImage(image)
         else {
 
             showAlert(
@@ -1040,23 +1043,8 @@ class profileViewController:
         }
 
 
-        // -----------------------------------------
-        // Mark upload as running
-        // -----------------------------------------
-
         isUploadingProfileImage =
             true
-
-
-        print("===================================")
-        print("PREPARED PROFILE IMAGE")
-        print(
-            "Upload Size: \(imageData.count / 1024) KB"
-        )
-        print(
-            "Upload Bytes: \(imageData.count)"
-        )
-        print("===================================")
 
 
         defer {
@@ -1068,9 +1056,9 @@ class profileViewController:
 
         do {
 
-            // -----------------------------------------
-            // Get current user
-            // -----------------------------------------
+            // =========================================
+            // STEP 1 - GET USER
+            // =========================================
 
             let user =
                 try await
@@ -1083,35 +1071,47 @@ class profileViewController:
                 user.id.uuidString
 
 
-            // -----------------------------------------
-            // Storage file path
-            // -----------------------------------------
+            print("")
+            print("===================================")
+            print("STEP 1 - CURRENT USER")
+            print("User ID:")
+            print(userID)
+            print("===================================")
+
+
+            // =========================================
+            // STEP 2 - STORAGE FILE PATH
+            // =========================================
 
             let filePath =
                 "\(userID).jpg"
 
 
+            print("")
             print("===================================")
-            print("PROFILE IMAGE UPLOAD")
-            print("User ID: \(userID)")
+            print("STEP 2 - STORAGE FILE")
+            print(filePath)
+            print("===================================")
+
+
+            // =========================================
+            // STEP 3 - UPLOAD TO STORAGE
+            // =========================================
+
+            print("")
+            print("===================================")
+            print("STEP 3 - STORAGE UPLOAD")
             print("Bucket: profile-images")
-            print("File Path: \(filePath)")
             print(
-                "Data Size: \(imageData.count / 1024) KB"
+                "Size: \(imageData.count / 1024) KB"
             )
             print("===================================")
 
 
-            // -----------------------------------------
-            // Upload to Supabase Storage
-            // -----------------------------------------
-
             try await
                 SupabaseManager.shared.client
                 .storage
-                .from(
-                    "profile-images"
-                )
+                .from("profile-images")
                 .upload(
                     filePath,
                     data:
@@ -1129,21 +1129,19 @@ class profileViewController:
 
 
             print(
-                "✅ IMAGE UPLOADED TO STORAGE"
+                "✅ STORAGE UPLOAD SUCCESS"
             )
 
 
-            // -----------------------------------------
-            // Get public URL
-            // -----------------------------------------
+            // =========================================
+            // STEP 4 - GET PUBLIC URL
+            // =========================================
 
             let publicURL =
                 try
                 SupabaseManager.shared.client
                 .storage
-                .from(
-                    "profile-images"
-                )
+                .from("profile-images")
                 .getPublicURL(
                     path:
                         filePath
@@ -1154,29 +1152,64 @@ class profileViewController:
                 publicURL.absoluteString
 
 
+            print("")
             print("===================================")
-            print("PUBLIC IMAGE URL")
+            print("STEP 4 - PUBLIC URL")
             print(imageURL)
             print("===================================")
 
 
-            // -----------------------------------------
-            // Update profiles table
-            // -----------------------------------------
+            guard !imageURL.isEmpty else {
 
-            let updatedProfile:
-                Profile =
+                throw NSError(
+                    domain:
+                        "ProfileImageError",
+                    code:
+                        1001,
+                    userInfo:
+                        [
+                            NSLocalizedDescriptionKey:
+                                "Supabase returned an empty image URL."
+                        ]
+                )
+            }
+
+
+            // =========================================
+            // STEP 5 - UPDATE DATABASE
+            // =========================================
+
+            print("")
+            print("===================================")
+            print("STEP 5 - DATABASE UPDATE")
+            print("Table: profiles")
+            print("Column: profile_image")
+            print("User ID: \(userID)")
+            print("URL:")
+            print(imageURL)
+            print("===================================")
+
+
+            let update =
+                ProfileImageUpdate(
+                    profileImage:
+                        imageURL
+                )
+
+
+            // IMPORTANT:
+            // .select().single() returns the updated row.
+            // This confirms that the database actually
+            // updated one profile.
+
+            let savedProfile:
+                Profilee =
 
                 try await
                 SupabaseManager.shared.client
-                .from(
-                    "profiles"
-                )
+                .from("profiles")
                 .update(
-                    [
-                        "profile_image":
-                            imageURL
-                    ]
+                    update
                 )
                 .eq(
                     "id",
@@ -1189,13 +1222,29 @@ class profileViewController:
                 .value
 
 
-            // -----------------------------------------
-            // Verify database value
-            // -----------------------------------------
+            print("")
+            print("===================================")
+            print("✅ DATABASE UPDATE SUCCESS")
+            print("===================================")
+
+            print(
+                "Saved profile_image:"
+            )
+
+            print(
+                savedProfile.profileImage ?? "NULL"
+            )
+
+            print("===================================")
+
+
+            // =========================================
+            // STEP 6 - VERIFY VALUE
+            // =========================================
 
             guard
                 let savedURL =
-                    updatedProfile.profileImage,
+                    savedProfile.profileImage,
 
                 !savedURL
                     .trimmingCharacters(
@@ -1209,44 +1258,35 @@ class profileViewController:
                     domain:
                         "ProfileImageError",
                     code:
-                        1001,
+                        1002,
                     userInfo:
                         [
                             NSLocalizedDescriptionKey:
-                                "The image uploaded successfully, but profile_image was not saved in the profiles table."
+                                "The profile row was updated, but profile_image is NULL."
                         ]
                 )
             }
 
 
-            print("===================================")
-            print("✅ DATABASE PROFILE UPDATED")
-            print(
-                "profile_image:"
-            )
-            print(savedURL)
-            print("===================================")
-
-
-            // -----------------------------------------
-            // Update local model
-            // -----------------------------------------
+            // =========================================
+            // STEP 7 - SAVE LOCAL PROFILE
+            // =========================================
 
             userProfile =
-                updatedProfile
+                savedProfile
 
 
-            // -----------------------------------------
-            // Show selected image
-            // -----------------------------------------
+            // =========================================
+            // STEP 8 - SHOW SELECTED IMAGE
+            // =========================================
 
             profileImageView.image =
                 image
 
 
-            // -----------------------------------------
-            // Clear Kingfisher cache
-            // -----------------------------------------
+            // =========================================
+            // STEP 9 - CLEAR KINGFISHER CACHE
+            // =========================================
 
             if let url =
                 URL(
@@ -1268,9 +1308,9 @@ class profileViewController:
             }
 
 
-            // -----------------------------------------
-            // Cache busting
-            // -----------------------------------------
+            // =========================================
+            // STEP 10 - FORCE REFRESH IMAGE
+            // =========================================
 
             let separator =
                 savedURL.contains("?")
@@ -1278,7 +1318,7 @@ class profileViewController:
                 : "?"
 
 
-            let cacheBustingURLString =
+            let cacheBustingURL =
                 savedURL
                 + separator
                 + "v="
@@ -1290,19 +1330,23 @@ class profileViewController:
                 )
 
 
-            if let cacheBustingURL =
+            if let url =
                 URL(
                     string:
-                        cacheBustingURLString
+                        cacheBustingURL
                 ) {
+
+                profileImageView.kf.cancelDownloadTask()
 
                 profileImageView.kf.setImage(
                     with:
-                        cacheBustingURL,
+                        url,
                     placeholder:
                         image,
                     options: [
+
                         .forceRefresh,
+
                         .transition(
                             .fade(0.2)
                         )
@@ -1311,10 +1355,13 @@ class profileViewController:
             }
 
 
+            // =========================================
+            // SUCCESS
+            // =========================================
+
+            print("")
             print("===================================")
-            print(
-                "✅ PROFILE IMAGE SAVED SUCCESSFULLY"
-            )
+            print("🎉 PROFILE IMAGE COMPLETE")
             print("===================================")
 
 
@@ -1328,12 +1375,16 @@ class profileViewController:
 
         } catch {
 
+            print("")
             print("===================================")
-            print(
-                "❌ PROFILE IMAGE SAVE ERROR"
-            )
+            print("❌ PROFILE IMAGE ERROR")
+            print("===================================")
 
             print(error)
+
+            print(
+                "Description:"
+            )
 
             print(
                 error.localizedDescription
@@ -1369,24 +1420,17 @@ class profileViewController:
     }
 
 
-    // MARK: - Update Profile
+    // MARK: - Update Profile Text
 
     private func updateProfile(
-        name:
-            String,
-        phone:
-            String,
-        address:
-            String
+        name: String,
+        phone: String,
+        address: String
     ) {
 
         Task {
 
             do {
-
-                // -----------------------------------------
-                // Get current user
-                // -----------------------------------------
 
                 let user =
                     try await
@@ -1399,85 +1443,53 @@ class profileViewController:
                     user.id.uuidString
 
 
-                // -----------------------------------------
-                // Prepare update data
-                // -----------------------------------------
-
-                var updateData:
-                    [String: String] = [
-
-                        "full_name":
+                let update =
+                    ProfileTextUpdate(
+                        fullName:
                             name,
-
-                        "phone":
-                            phone
-                    ]
-
-
-                // -----------------------------------------
-                // Address
-                // -----------------------------------------
-
-                if address.isEmpty {
-
-                    updateData[
-                        "address"
-                    ] = ""
-
-                } else {
-
-                    updateData[
-                        "address"
-                    ] =
-                        address
-                }
-
-
-                // -----------------------------------------
-                // Update Supabase
-                // -----------------------------------------
-
-                try await
-                    SupabaseManager.shared.client
-                    .from(
-                        "profiles"
+                        phone:
+                            phone,
+                        address:
+                            address
                     )
+
+
+                // Use select().single()
+                // so we know the row was actually updated.
+
+                let updatedProfile:
+                    Profilee =
+
+                    try await
+                    SupabaseManager.shared.client
+                    .from("profiles")
                     .update(
-                        updateData
+                        update
                     )
                     .eq(
                         "id",
                         value:
                             userID
                     )
+                    .select()
+                    .single()
                     .execute()
+                    .value
 
 
+                userProfile =
+                    updatedProfile
+
+
+                displayProfile(
+                    updatedProfile
+                )
+
+
+                print("")
                 print("===================================")
-                print(
-                    "✅ PROFILE TEXT UPDATED"
-                )
-
-                print(
-                    "Name: \(name)"
-                )
-
-                print(
-                    "Phone: \(phone)"
-                )
-
-                print(
-                    "Address: \(address)"
-                )
-
+                print("✅ PROFILE TEXT UPDATED")
                 print("===================================")
-
-
-                // -----------------------------------------
-                // Reload profile
-                // -----------------------------------------
-
-                fetchUserProfile()
 
 
                 showAlert(
@@ -1487,13 +1499,12 @@ class profileViewController:
                         "Profile updated successfully."
                 )
 
-
             } catch {
 
+                print("")
                 print("===================================")
-                print(
-                    "❌ PROFILE UPDATE ERROR"
-                )
+                print("❌ PROFILE UPDATE ERROR")
+                print("===================================")
 
                 print(error)
 
@@ -1577,39 +1588,23 @@ class profileViewController:
                     .signOut()
 
 
-                print(
-                    "==================================="
-                )
-
-                print(
-                    "✅ USER LOGGED OUT"
-                )
-
-                print(
-                    "==================================="
-                )
+                print("")
+                print("===================================")
+                print("✅ USER LOGGED OUT")
+                print("===================================")
 
 
                 goToLoginScreen()
 
-
             } catch {
 
-                print(
-                    "==================================="
-                )
-
-                print(
-                    "❌ LOGOUT ERROR"
-                )
-
+                print("")
+                print("===================================")
+                print("❌ LOGOUT ERROR")
                 print(
                     error.localizedDescription
                 )
-
-                print(
-                    "==================================="
-                )
+                print("===================================")
 
 
                 showAlert(
@@ -1644,7 +1639,6 @@ class profileViewController:
                         "LoginViewController"
                 )
                 as? LoginViewController
-
         else {
 
             print(
@@ -1700,10 +1694,8 @@ class profileViewController:
     // MARK: - Alert
 
     private func showAlert(
-        title:
-            String,
-        message:
-            String,
+        title: String,
+        message: String,
         completion:
             (() -> Void)? = nil
     ) {
