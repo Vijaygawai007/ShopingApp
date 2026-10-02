@@ -103,7 +103,6 @@ class profileViewController:
 
     private func setupCards() {
 
-        
         profileImageView.layer.borderWidth = 2
         profileImageView.layer.shadowOffset = .init(width: 6, height: 6)
 
