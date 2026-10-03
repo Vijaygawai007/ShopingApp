@@ -238,30 +238,38 @@ class resetViewController: UIViewController {
         _ sender: Any
     ) {
         
-        guard let navigationController = navigationController else {
+        let storyboard1 = UIStoryboard(
+            name: "Main",
+            bundle: nil
+        )
+        
+        
+        guard let forgetVC =
+                storyboard1.instantiateViewController(
+                    withIdentifier:
+                        "LoginViewController"
+                ) as? LoginViewController
+        else {
+            
+            print(
+                "❌ LoginViewController not found."
+            )
+            
+            print(
+                "Check Storyboard ID: LoginViewController"
+            )
+            
             return
         }
         
         
-        // Find LoginViewController in navigation stack
+        forgetVC.modalPresentationStyle =
+            .fullScreen
         
-        if let loginViewController = navigationController.viewControllers.first(
-            where: { $0 is LoginViewController }
-        ) {
-            
-            navigationController.popToViewController(
-                loginViewController,
-                animated: true
-            )
-            
-        } else {
-            
-            // If LoginViewController is not found,
-            // simply go back one screen.
-            
-            navigationController.popViewController(
-                animated: true
-            )
-        }
+        
+        present(
+            forgetVC,
+            animated: true
+        )
     }
 }
