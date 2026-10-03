@@ -184,6 +184,79 @@ class DatabaseManager {
         
         return products
     }
+    //
+    // MARK: - Update Cart Product Quantity
+
+    func updateCartQuantity(
+        productID: Int,
+        quantity: Int
+    ) {
+
+        let query = """
+        UPDATE CartProducts
+        SET quantity = ?
+        WHERE id = ?;
+        """
+
+        var statement: OpaquePointer?
+
+        guard sqlite3_prepare_v2(
+            db,
+            query,
+            -1,
+            &statement,
+            nil
+        ) == SQLITE_OK else {
+
+            print(
+                "❌ Failed to prepare quantity update:",
+                String(cString: sqlite3_errmsg(db))
+            )
+
+            return
+        }
+
+        defer {
+            sqlite3_finalize(statement)
+        }
+
+        // Bind Quantity
+
+        sqlite3_bind_int(
+            statement,
+            1,
+            Int32(max(1, quantity))
+        )
+
+        // Bind Product ID
+
+        sqlite3_bind_int(
+            statement,
+            2,
+            Int32(productID)
+        )
+
+        // Execute Update
+
+        if sqlite3_step(statement) == SQLITE_DONE {
+
+            print("✅ Cart quantity updated successfully")
+
+            print("🛒 Product ID:", productID)
+
+            print("📦 New Quantity:", quantity)
+
+        } else {
+
+            print(
+                "❌ Quantity update failed:",
+                String(cString: sqlite3_errmsg(db))
+            )
+        }
+    }
+    
+    //
+    
     //MARK: DELETE CART PRODUCT FROM DATABASE
     func deleteCartProduct(productID: Int) {
 

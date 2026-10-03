@@ -1,4 +1,3 @@
-
 //
 //  CartsViewController.swift
 //  ShopingApp
@@ -25,12 +24,7 @@ class CartViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        cartTable.delegate = self
-        cartTable.dataSource = self
-
-        cartTable.rowHeight = UITableView.automaticDimension
-        cartTable.showsVerticalScrollIndicator = false
-
+        setupTableView()
         fetchCart()
     }
 
@@ -40,6 +34,21 @@ class CartViewController: UIViewController {
         super.viewWillAppear(animated)
 
         fetchCart()
+    }
+
+    // MARK: - Setup TableView
+
+    private func setupTableView() {
+
+        cartTable.delegate = self
+        cartTable.dataSource = self
+
+        cartTable.rowHeight =
+            UITableView.automaticDimension
+
+        cartTable.estimatedRowHeight = 200
+
+        cartTable.showsVerticalScrollIndicator = false
     }
 
     // MARK: - Fetch Cart
@@ -82,10 +91,72 @@ class CartViewController: UIViewController {
             )
         }
 
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
 
-            self.cartTable.reloadData()
+            self?.cartTable.reloadData()
         }
+    }
+
+    // MARK: - Update Quantity
+
+    private func updateQuantity(
+        productID: Int,
+        newQuantity: Int,
+        cell: CartTableViewCell
+    ) {
+
+        // Minimum quantity = 1
+        let quantity =
+            max(1, newQuantity)
+
+        // -----------------------------------------
+        // Update SQLite
+        // -----------------------------------------
+
+        DatabaseManager.shared.updateCartQuantity(
+            productID: productID,
+            quantity: quantity
+        )
+
+        // -----------------------------------------
+        // Find Product
+        // -----------------------------------------
+
+        guard let product =
+                cartProducts.first(
+                    where: {
+                        $0.id == productID
+                    }
+                )
+        else {
+            return
+        }
+
+        // -----------------------------------------
+        // Calculate New Total
+        // -----------------------------------------
+
+        let total =
+            product.price *
+            Double(quantity)
+
+        // -----------------------------------------
+        // Update Cell UI
+        // -----------------------------------------
+
+        cell.quentity.text =
+            "Qty: \(quantity)"
+
+        cell.cartPrice.text =
+            "₹\(total)"
+
+        print("--------------------------------")
+        print("✅ QUANTITY UPDATED")
+        print("🛒 Product ID:", productID)
+        print("📦 Product:", product.title)
+        print("📦 New Quantity:", quantity)
+        print("💰 New Total:", total)
+        print("--------------------------------")
     }
 }
 
@@ -114,7 +185,8 @@ extension CartViewController:
 
         let cell =
             tableView.dequeueReusableCell(
-                withIdentifier: "CartTableViewCell",
+                withIdentifier:
+                    "CartTableViewCell",
                 for: indexPath
             ) as! CartTableViewCell
 
@@ -123,39 +195,96 @@ extension CartViewController:
 
         // MARK: - Title
 
-        if !product.title.isEmpty {
+        if product.title.isEmpty {
+
+            cell.cartTitle.text = ""
+
+        } else {
 
             cell.cartTitle.text =
                 product.title
-
-        } else {
-
-            cell.cartTitle.text = ""
-        }
-
-        // MARK: - Price
-
-        if product.price > 0 {
-
-            cell.cartPrice.text =
-                "₹\(product.price)"
-
-        } else {
-
-            cell.cartPrice.text = ""
         }
 
         // MARK: - Quantity
 
-        if product.quantity > 0 {
+        cell.quentity.text =
+            "Qty: \(product.quantity)"
 
-            cell.quentity.text =
-                "Qty: \(product.quantity)"
+        // MARK: - Stepper Configuration
+
+        cell.qty_Steper.minimumValue = 1
+
+        cell.qty_Steper.maximumValue = 99
+
+        cell.qty_Steper.stepValue = 1
+
+        cell.qty_Steper.value =
+            Double(product.quantity)
+
+        // MARK: - Price
+
+        let total =
+            product.price *
+            Double(product.quantity)
+
+        if product.price > 0 {
+
+            cell.cartPrice.text =
+                "₹\(total)"
 
         } else {
 
-            cell.quentity.text = ""
+            cell.cartPrice.text = "0"
         }
+
+        // MARK: - Discount Percentage
+
+        if let discount =
+            product.discountPercentage,
+           discount > 0 {
+
+            cell.DiscouontPercentage.text =
+                "\(discount)% OFF"
+
+        } else {
+
+            cell.DiscouontPercentage.text =
+                "0%"
+        }
+
+        // MARK: - Discounted Total
+
+        if let discountedTotal =
+            product.discountedTotal,
+           discountedTotal > 0 {
+
+            cell.TotalDiscount.text =
+                "₹\(discountedTotal)"
+
+        } else {
+
+            cell.TotalDiscount.text =
+                "0%"
+        }
+        
+
+        // MARK: - Quantity Changed
+
+        cell.onQuantityChange =
+            { [weak self, weak cell] newQuantity in
+
+                guard let self = self,
+                      let cell = cell
+                else {
+                    return
+                }
+
+                self.updateQuantity(
+                    productID: product.id,
+                    newQuantity: newQuantity,
+                    cell: cell
+                )
+            }
 
         // MARK: - Thumbnail
 
@@ -174,6 +303,8 @@ extension CartViewController:
                     UIImage(systemName: "photo")
             )
         }
+
+        // MARK: - Selection
 
         cell.selectionStyle = .none
 
@@ -195,14 +326,31 @@ extension CartViewController:
         let cartProduct =
             cartProducts[indexPath.row]
 
-        print("➡️ Selected Cart Product")
-        print("ID:", cartProduct.id)
-        print("Title:", cartProduct.title)
-        print("Price:", cartProduct.price)
+        print(
+            "➡️ Selected Cart Product"
+        )
 
-        // -----------------------------------------
-        // Storyboard
-        // -----------------------------------------
+        print(
+            "ID:",
+            cartProduct.id
+        )
+
+        print(
+            "Title:",
+            cartProduct.title
+        )
+
+        print(
+            "Price:",
+            cartProduct.price
+        )
+
+        print(
+            "Quantity:",
+            cartProduct.quantity
+        )
+
+        // MARK: - Storyboard
 
         let storyboard =
             UIStoryboard(
@@ -212,31 +360,33 @@ extension CartViewController:
 
         guard let detailVC =
                 storyboard.instantiateViewController(
-                    withIdentifier: "DetailViewController"
+                    withIdentifier:
+                        "DetailViewController"
                 ) as? DetailViewController
         else {
 
-            print("❌ DetailViewController not found.")
-            print("❌ Check Storyboard ID: DetailViewController")
+            print(
+                "❌ DetailViewController not found."
+            )
+
+            print(
+                "❌ Check Storyboard ID: DetailViewController"
+            )
 
             return
         }
 
-        // -----------------------------------------
-        // Pass Cart Product
-        // -----------------------------------------
+        // MARK: - Pass Cart Product
 
-        detailVC.cartProduct = cartProduct
+        detailVC.cartProduct =
+            cartProduct
 
-        // -----------------------------------------
-        // Section
-        // -----------------------------------------
+        // MARK: - Section
 
-        detailVC.sectionTitle = "Cart"
+        detailVC.sectionTitle =
+            "Cart"
 
-        // -----------------------------------------
-        // Navigate
-        // -----------------------------------------
+        // MARK: - Navigate
 
         if let navigationController =
             self.navigationController {
@@ -258,7 +408,6 @@ extension CartViewController:
         }
     }
 
-
     // MARK: - Row Height
 
     func tableView(
@@ -279,7 +428,8 @@ extension CartViewController:
             title.boundingRect(
                 with: CGSize(
                     width: width,
-                    height: .greatestFiniteMagnitude
+                    height:
+                        .greatestFiniteMagnitude
                 ),
                 options: [
                     .usesLineFragmentOrigin,
