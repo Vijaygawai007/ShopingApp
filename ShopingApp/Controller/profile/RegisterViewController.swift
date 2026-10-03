@@ -524,29 +524,40 @@ class RegisterViewController: UIViewController {
     
     @IBAction func loginBTN(
         _ sender: Any
-    ) {
-            guard let navigationController = navigationController else {
-                return
-            }
+    ){
+        
+        let storyboard1 = UIStoryboard(
+            name: "Main",
+            bundle: nil
+        )
+        
+        
+        guard let forgetVC =
+                storyboard1.instantiateViewController(
+                    withIdentifier:
+                        "LoginViewController"
+                ) as? LoginViewController
+        else {
             
-            // Find LoginViewController in navigation stack
-            if let loginViewController = navigationController.viewControllers.first(
-                where: { $0 is LoginViewController }
-            ) {
-                
-                navigationController.popToViewController(
-                    loginViewController,
-                    animated: true
-                )
-                
-            } else {
-                
-                // If LoginViewController is not found,
-                // go back to the previous screen.
-                
-                navigationController.popViewController(
-                    animated: true
-                )
-            }
+            print(
+                "❌ LoginViewController not found."
+            )
+            
+            print(
+                "Check Storyboard ID: LoginViewController"
+            )
+            
+            return
+        }
+        
+        
+        forgetVC.modalPresentationStyle =
+            .fullScreen
+        
+        
+        present(
+            forgetVC,
+            animated: true
+        )
         }
     }
