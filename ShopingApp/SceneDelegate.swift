@@ -22,65 +22,39 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             return
         }
 
-        let storyboard = UIStoryboard(name: "Main", bundle: nil)
+        let storyboard = UIStoryboard(
+            name: "Main",
+            bundle: nil
+        )
 
-        Task {
+        guard let onboardingVC = storyboard.instantiateViewController(
+            withIdentifier: "Onboarding_ViewController"
+        ) as? Onboarding_ViewController else {
 
-            let currentSession =
-                try? await SupabaseManager.shared.client.auth.session
-
-            await MainActor.run {
-
-                if currentSession != nil {
-
-                    let homeVC = storyboard.instantiateViewController(
-                        withIdentifier: "LoginViewController"
-                    )
-
-                    self.window = UIWindow(windowScene: windowScene)
-                    self.window?.rootViewController = homeVC
-                    self.window?.makeKeyAndVisible()
-
-                } else {
-
-                    let loginVC = storyboard.instantiateViewController(
-                        withIdentifier: "LoginViewController"
-                    )
-
-                    self.window = UIWindow(windowScene: windowScene)
-                    self.window?.rootViewController = loginVC
-                    self.window?.makeKeyAndVisible()
-                }
-            }
+            print("❌ Onboarding_ViewController not found")
+            return
         }
+
+        let navigationController = UINavigationController(
+            rootViewController: onboardingVC
+        )
+
+        navigationController.setNavigationBarHidden(
+            true,
+            animated: false
+        )
+
+        let window = UIWindow(
+            windowScene: windowScene
+        )
+
+        window.rootViewController = navigationController
+
+        self.window = window
+
+        window.makeKeyAndVisible()
+
+        print("✅ SceneDelegate loaded")
+        print("✅ Onboarding is root")
     }
 }
-
-    func sceneDidDisconnect(_ scene: UIScene) {
-        // Called as the scene is being released by the system.
-        // This occurs shortly after the scene enters the background, or when its session is discarded.
-        // Release any resources associated with this scene that can be re-created the next time the scene connects.
-        // The scene may re-connect later, as its session was not necessarily discarded (see `application:didDiscardSceneSessions` instead).
-    }
-
-    func sceneDidBecomeActive(_ scene: UIScene) {
-        // Called when the scene has moved from an inactive state to an active state.
-        // Use this method to restart any tasks that were paused (or not yet started) when the scene was inactive.
-    }
-
-    func sceneWillResignActive(_ scene: UIScene) {
-        // Called when the scene will move from an active state to an inactive state.
-        // This may occur due to temporary interruptions (ex. an incoming phone call).
-    }
-
-    func sceneWillEnterForeground(_ scene: UIScene) {
-        // Called as the scene transitions from the background to the foreground.
-        // Use this method to undo the changes made on entering the background.
-    }
-
-    func sceneDidEnterBackground(_ scene: UIScene) {
-        // Called as the scene transitions from the foreground to the background.
-        // Use this method to save data, release shared resources, and store enough scene-specific state information
-        // to restore the scene back to its current state.
-    }
-

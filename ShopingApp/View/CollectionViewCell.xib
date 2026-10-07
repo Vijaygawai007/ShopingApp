@@ -92,6 +92,7 @@
                 </subviews>
             </view>
             <viewLayoutGuide key="safeArea" id="ZTg-uK-7eu"/>
+            <color key="backgroundColor" white="0.0" alpha="0.0" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
             <constraints>
                 <constraint firstItem="i3V-b6-RtT" firstAttribute="top" secondItem="gTV-IL-0wX" secondAttribute="top" constant="15" id="C9l-jC-OiC"/>
                 <constraint firstAttribute="trailing" secondItem="i3V-b6-RtT" secondAttribute="trailing" constant="20" id="IWw-WN-cHX"/>
@@ -111,7 +112,7 @@
         </collectionViewCell>
     </objects>
     <resources>
-        <image name="heart" catalog="system" width="32" height="32"/>
+        <image name="heart" catalog="system" width="128" height="107"/>
         <systemColor name="secondaryLabelColor">
             <color red="0.23529411759999999" green="0.23529411759999999" blue="0.26274509800000001" alpha="0.59999999999999998" colorSpace="custom" customColorSpace="sRGB"/>
         </systemColor>
