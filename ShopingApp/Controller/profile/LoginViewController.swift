@@ -447,39 +447,35 @@ class LoginViewController: UIViewController {
                     }
                 }
             }
-
+    
     // MARK: - Open Home Tab Bar
 
-        private func openHomeScreen() {
-            let storyboard = UIStoryboard(name: "Main", bundle: nil)
+    private func openHomeScreen() {
 
-            // 1. Get Tab Bar Controller using your specific identifier
-            guard let tabBarController = storyboard.instantiateViewController(withIdentifier: "tabbarViewController") as? UITabBarController else {
-                print("❌ Tab Bar Controller not found. Check the Storyboard ID: ViewController")
-                return
-            }
+        print("🚀 Opening Tab Bar")
 
-            // 2. Select Home Tab (Optional)
-            tabBarController.selectedIndex = 0
+        let storyboard = UIStoryboard(name: "Main", bundle: nil)
 
-            // 3. Change Root View Controller
-            guard let windowScene = view.window?.windowScene,
-                  let window = windowScene.windows.first else {
-                print("❌ Window not found.")
-                return
-            }
+        guard let tabBarController = storyboard.instantiateViewController(
+            withIdentifier: "tabbarViewController"
+        ) as? UITabBarController else {
 
-            window.rootViewController = tabBarController
-            window.makeKeyAndVisible()
-
-            // 4. Transition Animation
-            UIView.transition(
-                with: window,
-                duration: 0.3,
-                options: .transitionCrossDissolve,
-                animations: nil
-            )
+            print("❌ Tab Bar Controller not found")
+            return
         }
+
+        print("✅ Tab Bar instantiated")
+
+        tabBarController.selectedIndex = 0
+        tabBarController.modalPresentationStyle = .fullScreen
+
+        present(
+            tabBarController,
+            animated: true
+        ) {
+            print("✅ Tab Bar presented")
+        }
+    }
 
     // MARK: - Sign Up
 
